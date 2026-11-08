@@ -1,4 +1,3 @@
-
 (() => {
 const $=id=>document.getElementById(id), dbName='MoyaZarplataDB', store='days';
 let db, orders=[], missed=[], currentMonth='';
@@ -268,6 +267,7 @@ async function save(){
 
  await renderMonth();
  renderCalc();
+ await renderStats();
 
  if(navigator.onLine)await sync();
 }
@@ -407,6 +407,7 @@ async function restoreAll(){
 
   $('message').textContent=
    `Восстановление завершено. Обновлено дней: ${loaded}. Месяцев в облаке: ${months.length}.`;
+  await renderStats();
 
  }catch(e){
   $('message').textContent='Не удалось восстановить историю: '+e.message;
@@ -450,6 +451,135 @@ async function sync(){
  }
 
  await renderMonth();
+}
+
+
+function monthKeyFromDate(date){
+ return String(date||'').slice(0,7);
+}
+
+function statsPeriodValue(){
+ const period=$('statsPeriod').value;
+ return period==='year'?String($('statsYear').value||today.getFullYear()):$('statsMonth').value;
+}
+
+async function renderStats(){
+ const period=$('statsPeriod').value;
+ const selected=statsPeriodValue();
+ const allDays=await all();
+ let selectedDays=[];
+
+ if(period==='year'){
+  selectedDays=allDays.filter(d=>String(d.date||'').startsWith(selected+'-'));
+  $('statsPeriodLabel').textContent='За '+selected+' год';
+ }else{
+  selectedDays=allDays.filter(d=>monthKeyFromDate(d.date)===selected);
+  $('statsPeriodLabel').textContent='За '+(selected?new Date(selected+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'long',year:'numeric'}):'месяц');
+ }
+
+ selectedDays.sort((a,b)=>a.date.localeCompare(b.date));
+ const workDays=selectedDays.filter(d=>d.status!=='Выходной');
+ let variable=0,weightPay=0,pointsPay=0,overtimePay=0,overtimeHours=0,ordersCount=0,weightKg=0,points=0,missedCount=0;
+ const daily=selectedDays.map(d=>{
+  const c=calc(d);
+  if(d.status!=='Выходной'){
+   variable+=c.total;
+   weightPay+=c.weightPay;
+   pointsPay+=c.pointsPay;
+   overtimePay+=c.overtimePay;
+   weightKg+=c.weight;
+   points+=c.points;
+  }
+  overtimeHours+=Number(d.overtime)||0;
+  ordersCount+=(d.orders||[]).filter(o=>o.zn||Number(o.weight)||Number(o.points)).length;
+  missedCount+=(d.undelivered||[]).filter(m=>m.number||m.reason).length;
+  return {date:d.date,amount:c.total};
+ });
+
+ const monthsWithRecords=new Set(selectedDays.map(d=>monthKeyFromDate(d.date)));
+ const salary=period==='year'?rates.salary*monthsWithRecords.size:(selectedDays.length?rates.salary:0);
+ const total=salary+variable;
+
+ $('statTotal').textContent=rub(total);
+ $('statWorkDays').textContent=String(workDays.length);
+ $('statOrders').textContent=String(ordersCount);
+ $('statOvertime').textContent=(Math.round(overtimeHours*10)/10).toLocaleString('ru-RU')+' ч';
+ $('statSalary').textContent=rub(salary);
+ $('statWeightPay').textContent=rub(weightPay);
+ $('statPointsPay').textContent=rub(pointsPay);
+ $('statOvertimePay').textContent=rub(overtimePay);
+
+ const chartDays=daily.filter(x=>x.amount>0).slice(-12);
+ const max=Math.max(1,...chartDays.map(x=>x.amount));
+ $('statsChart').innerHTML=chartDays.length?chartDays.map(x=>{
+  const day=x.date.slice(-2);
+  const width=Math.max(2,Math.round(x.amount/max*100));
+  return `<div class="stats-bar-row"><span>${day}</span><div class="stats-bar-track"><div class="stats-bar-fill" style="width:${width}%"></div></div><b class="stats-bar-value">${rub(x.amount)}</b></div>`;
+ }).join(''):'<p class="message">Нет начислений за выбранный период.</p>';
+
+ // Forecast only for current month; it is an estimate, not a payroll promise.
+ let forecastText='Недоступен для выбранного периода';
+ let forecastNote='Выбери текущий месяц для расчёта прогноза.';
+ if(period==='month'&&selected===monthNow){
+  const now=new Date();
+  const elapsed=Math.max(1,now.getDate());
+  const daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const projected=Math.round(total/elapsed*daysInMonth);
+  forecastText=rub(projected);
+  forecastNote=`Оценка по начислениям на ${now.getDate()} число. Не является гарантированной суммой.`;
+ }
+ $('statForecast').textContent=forecastText;
+ $('statForecastNote').textContent=forecastNote;
+
+ // Compare selected month with previous month when both are month views.
+ if(period==='month'&&selected){
+  const d=new Date(selected+'-01T12:00:00');
+  d.setMonth(d.getMonth()-1);
+  const previousKey=`${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+  const previousDays=allDays.filter(x=>monthKeyFromDate(x.date)===previousKey);
+  if(previousDays.length){
+   const previousTotal=rates.salary+previousDays.reduce((s,x)=>s+(x.status==='Выходной'?0:calc(x).total),0);
+   const diff=total-previousTotal;
+   const sign=diff>0?'+':'';
+   $('statsCompare').textContent=`По сравнению с ${d.toLocaleDateString('ru-RU',{month:'long',year:'numeric'})}: ${sign}${rub(diff)} (предыдущий месяц: ${rub(previousTotal)}).`;
+  }else{
+   $('statsCompare').textContent='Для сравнения с предыдущим месяцем пока недостаточно сохранённых данных.';
+  }
+ }else{
+  $('statsCompare').textContent=`Дополнительно: оплачиваемый вес ${Math.round(weightKg*100)/100} кг · точки ${Math.round(points*100)/100} · невывозы ${missedCount}.`;
+ }
+ $('statsMessage').textContent=`Учтено дней: ${selectedDays.length}. В годовом режиме оклад учитывается только за месяцы, в которых есть сохранённые дни.`;
+}
+
+async function exportStatsCSV(){
+ const period=$('statsPeriod').value;
+ const selected=statsPeriodValue();
+ const days=(await all()).filter(d=>period==='year'
+  ?String(d.date||'').startsWith(selected+'-')
+  :monthKeyFromDate(d.date)===selected
+ ).sort((a,b)=>a.date.localeCompare(b.date));
+
+ const rows=[['Дата','Статус','Водитель','Поддоны','Заказов ЗН','Вес, кг','Точки','Переработка, ч','Начислено за день, руб']];
+ for(const d of days){
+  const c=calc(d);
+  const orders=(d.orders||[]).filter(o=>o.zn||Number(o.weight)||Number(o.points));
+  rows.push([
+   d.date,d.status||'Рабочий',d.driver||'',d.pallets||0,orders.length,
+   Math.round(c.weight*100)/100,Math.round(c.points*100)/100,
+   Number(d.overtime)||0,Math.round(c.total*100)/100
+  ]);
+ }
+ const csv='\\uFEFF'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\\r\\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');
+ a.href=url;
+ a.download=`zarplata-${selected}.csv`;
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+ URL.revokeObjectURL(url);
+ $('statsMessage').textContent='Файл CSV подготовлен для открытия в Excel.';
 }
 
 function buildReport(){
@@ -610,9 +740,13 @@ document.addEventListener('click',async e=>{
 
    if($('date').value===date){
     await loadDay(localDateString());
+  $('statsMonth').value=monthNow;
+  $('statsYear').value=today.getFullYear();
+  await renderStats();
    }else{
     await renderMonth();
    }
+   await renderStats();
 
   }catch(err){
    $('message').textContent='Не удалось удалить запись: '+err.message;
@@ -659,6 +793,17 @@ $('status').addEventListener('change',renderCalc);
 $('driver').addEventListener('input',renderCalc);
 $('pallets').addEventListener('input',renderCalc);
 $('overtime').addEventListener('input',renderCalc);
+
+
+$('statsPeriod').addEventListener('change',async()=>{
+ const yearMode=$('statsPeriod').value==='year';
+ $('statsMonth').hidden=yearMode;
+ $('statsYear').hidden=!yearMode;
+ await renderStats();
+});
+$('statsMonth').addEventListener('change',renderStats);
+$('statsYear').addEventListener('change',renderStats);
+$('exportStatsBtn').addEventListener('click',exportStatsCSV);
 
 window.addEventListener('online',()=>{
  $('net').textContent='Интернет есть';
