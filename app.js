@@ -517,16 +517,31 @@ async function renderStats(){
   return `<div class="stats-bar-row"><span>${day}</span><div class="stats-bar-track"><div class="stats-bar-fill" style="width:${width}%"></div></div><b class="stats-bar-value">${rub(x.amount)}</b></div>`;
  }).join(''):'<p class="message">Нет начислений за выбранный период.</p>';
 
- // Forecast only for current month; it is an estimate, not a payroll promise.
+ // Forecast for the current month: fixed salary + average variable earnings
+ // per saved working day, projected across weekdays (Mon-Fri) in the month.
  let forecastText='Недоступен для выбранного периода';
  let forecastNote='Выбери текущий месяц для расчёта прогноза.';
  if(period==='month'&&selected===monthNow){
   const now=new Date();
-  const elapsed=Math.max(1,now.getDate());
-  const daysInMonth=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
-  const projected=Math.round(total/elapsed*daysInMonth);
-  forecastText=rub(projected);
-  forecastNote=`Оценка по начислениям на ${now.getDate()} число. Не является гарантированной суммой.`;
+  const year=now.getFullYear();
+  const month=now.getMonth();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  let weekdaysInMonth=0;
+  for(let day=1;day<=daysInMonth;day++){
+   const weekday=new Date(year,month,day).getDay();
+   if(weekday!==0&&weekday!==6) weekdaysInMonth++;
+  }
+  const savedWorkDays=workDays;
+  if(savedWorkDays>0){
+   const averageVariablePerDay=variable/savedWorkDays;
+   const projectedVariable=averageVariablePerDay*weekdaysInMonth;
+   const projected=Math.round(rates.salary+projectedVariable);
+   forecastText=rub(projected);
+   forecastNote=`Оценка: оклад ${rub(rates.salary)} + средний переменный заработок за ${savedWorkDays} сохранённых рабочих дня, рассчитанный на ${weekdaysInMonth} будних дней месяца (график 5/2). Не является гарантированной суммой.`;
+  }else{
+   forecastText='Пока недостаточно данных';
+   forecastNote='Сохрани хотя бы один рабочий день, чтобы рассчитать прогноз.';
+  }
  }
  $('statForecast').textContent=forecastText;
  $('statForecastNote').textContent=forecastNote;
