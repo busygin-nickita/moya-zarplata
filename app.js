@@ -51,12 +51,12 @@ async function renderMonth(){
  let total=rates.salary,pending=0;days.forEach(d=>{if(d.status!=='Выходной') total+=calc(d).total;if(!d.synced)pending++});
  $('monthTotal').textContent=rub(total);$('pendingCount').textContent=pending+' ожидают';
  $('syncLabel').textContent=pending?'Есть несинхронизированные данные':'Локальные данные сохранены';
- $('daysList').innerHTML=days.sort((a,b)=>a.date.localeCompare(b.date)).map(d=>`<div class="day-item"><span>${new Date(d.date+'T12:00:00').toLocaleDateString('ru-RU',{day:'2-digit',month:'long'})} · ${d.status}</span><span>${rub(calc(d).total)}</span><button data-load="${d.date}">Открыть</button></div>`).join('')||'<p class="message">За этот месяц пока нет сохранённых дней.</p>';
+ $('daysList').innerHTML=`<button id="restoreBtn" type="button">Восстановить всю историю из Google</button>`+(days.sort((a,b)=>a.date.localeCompare(b.date)).map(d=>`<div class="day-item"><span>${new Date(d.date+'T12:00:00').toLocaleDateString('ru-RU',{day:'2-digit',month:'long'})} · ${esc(d.status||'Рабочий')}</span><span>${rub(calc(d).total)}</span><button data-load="${d.date}">Открыть</button><button class="remove" data-delete="${d.date}" title="Удалить день" aria-label="Удалить день">×</button></div>`).join('')||'<p class="message">За этот месяц пока нет сохранённых дней.</p>');
 }
 async function save(){
  const d=formData();if(!d.date){$('message').textContent='Выбери дату.';return}
  d.key=d.date;await put(d);$('message').textContent='Сохранено на этом iPhone · '+new Date().toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});
- await renderMonth();renderCalc();if(navigator.onLine)sync();
+ await renderMonth();renderCalc();if(navigator.onLine)await sync();
 }
 async function api(action,payload={}){
  const cfg=window.APP_CONFIG||{};const token=localStorage.getItem('MZ_API_TOKEN')||'';if(!cfg.API_URL||!token)throw new Error('Укажите URL Apps Script в config.js и сохраните токен в настройках приложения');
@@ -103,6 +103,25 @@ async function pullMonth(month, quiet=false){
   return {loaded:0,error:e};
  }
 }
+// Восстановление всей истории из всех месячных таблиц Google.
+async function restoreAll(){
+ if(!navigator.onLine){$('message').textContent='Для восстановления нужен интернет.';return}
+ $('message').textContent='Получаем список месяцев из Google Таблиц…';
+ try{
+  const list=await api('listMonths');
+  const months=(list.months||[]).map(x=>x.month).filter(Boolean);
+  let loaded=0;
+  for(const month of months){
+   const result=await pullMonth(month,true);
+   loaded+=result.loaded||0;
+  }
+  const selectedDate=$('date').value||localDateString();
+  await loadDay(selectedDate);
+  $('message').textContent=`Восстановление завершено. Обновлено дней: ${loaded}. Месяцев в облаке: ${months.length}.`;
+ }catch(e){
+  $('message').textContent='Не удалось восстановить историю: '+e.message;
+ }
+}
 async function sync(){
  if(!navigator.onLine){$('message').textContent='Нет интернета. Данные останутся на iPhone.';return}
  const cfg=window.APP_CONFIG||{};if(!cfg.API_URL||!localStorage.getItem('MZ_API_TOKEN')){$('message').textContent='Локально сохранено. Настройте URL и токен для синхронизации.';return}
@@ -139,6 +158,20 @@ document.addEventListener('click',async e=>{
  if(el.dataset.remove){const a=el.dataset.remove==='order'?orders:missed;a.splice(Number(el.dataset.i),1);renderRows();renderCalc()}
  if(el.id==='saveBtn')await save();
  if(el.id==='syncBtn')await sync();
+ if(el.id==='restoreBtn')await restoreAll();
+ if(el.dataset.delete){
+  const date=el.dataset.delete;
+  if(!navigator.onLine){$('message').textContent='Для удаления дня сначала подключись к интернету.';return}
+  if(!confirm('Удалить запись за '+date+' и из Google Таблиц? Это действие нельзя отменить.'))return;
+  try{
+   await api('deleteDay',{month:date.slice(0,7),date});
+   const request=tx('readwrite').delete(date);
+   await new Promise((resolve,reject)=>{request.onsuccess=resolve;request.onerror=()=>reject(request.error)});
+   $('message').textContent='Запись за '+date+' удалена из приложения и Google Таблиц.';
+   if($('date').value===date)await loadDay(localDateString());
+   else await renderMonth();
+  }catch(err){$('message').textContent='Не удалось удалить запись: '+err.message}
+ }
  if(el.id==='printBtn')buildReport();
  if(el.id==='tokenSave'){const t=$('apiToken').value.trim();if(t){localStorage.setItem('MZ_API_TOKEN',t);$('apiToken').value='';$('message').textContent='Токен сохранён локально на этом устройстве.'}else $('message').textContent='Вставь токен перед сохранением.'}
  if(el.id==='tokenClear'){localStorage.removeItem('MZ_API_TOKEN');$('apiToken').value='';$('message').textContent='Локальный токен удалён.'}
