@@ -740,9 +740,6 @@ document.addEventListener('click',async e=>{
 
    if($('date').value===date){
     await loadDay(localDateString());
-  $('statsMonth').value=monthNow;
-  $('statsYear').value=today.getFullYear();
-  await renderStats();
    }else{
     await renderMonth();
    }
@@ -828,6 +825,9 @@ window.addEventListener('offline',()=>{
   $('net').className=navigator.onLine?'pill green':'pill';
 
   await loadDay(localDateString());
+  $('statsMonth').value=monthNow;
+  $('statsYear').value=today.getFullYear();
+  await renderStats();
 
  }catch(e){
   $('message').textContent='Ошибка локального хранилища: '+e.message;
