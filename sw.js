@@ -1,5 +1,4 @@
-
-const CACHE = 'salary-pwa-v4-history';
+const CACHE = 'salary-pwa-v5-stats';
 
 const ASSETS = [
   './',
@@ -22,13 +21,9 @@ self.addEventListener('install', event => {
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys()
-      .then(keys =>
-        Promise.all(
-          keys
-            .filter(key => key !== CACHE)
-            .map(key => caches.delete(key))
-        )
-      )
+      .then(keys => Promise.all(
+        keys.filter(key => key !== CACHE).map(key => caches.delete(key))
+      ))
       .then(() => self.clients.claim())
   );
 });
@@ -37,16 +32,15 @@ self.addEventListener('fetch', event => {
   const request = event.request;
   const url = new URL(request.url);
 
-  if (url.origin !== location.origin || request.method !== 'GET') {
-    return;
-  }
+  if (url.origin !== location.origin || request.method !== 'GET') return;
 
-  const isAppFile =
+  const isAppAsset =
     url.pathname.endsWith('/app.js') ||
     url.pathname.endsWith('/index.html') ||
+    url.pathname.endsWith('/styles.css') ||
     url.pathname.endsWith('/');
 
-  if (isAppFile) {
+  if (isAppAsset) {
     event.respondWith(
       fetch(request, { cache: 'no-store' })
         .then(response => {
