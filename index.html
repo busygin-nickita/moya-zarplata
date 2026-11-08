@@ -10,6 +10,39 @@
 <header class="top"><div><div class="eyebrow">ЛИЧНЫЙ УЧЁТ</div><h1>Моя зарплата</h1></div><span id="net" class="pill">Проверка сети…</span></header>
 <main>
 <section class="hero card"><div class="eyebrow light">НАЧИСЛЕНО ЗА МЕСЯЦ</div><div id="monthTotal" class="money">0 ₽</div><div class="hero-bottom"><span id="monthLabel"></span><span id="syncLabel">Только на этом устройстве</span></div></section>
+<section class="card stats-card" id="statistics">
+<div class="section-head"><h2>Статистика</h2><span class="pill">По сохранённым дням</span></div>
+<div class="stats-controls">
+  <select id="statsPeriod" aria-label="Период статистики">
+    <option value="month">Месяц</option>
+    <option value="year">Год</option>
+  </select>
+  <input id="statsMonth" type="month" aria-label="Выбрать месяц">
+  <input id="statsYear" type="number" min="2020" max="2100" aria-label="Выбрать год" hidden>
+</div>
+<div class="stats-grid">
+  <div class="stat-tile stat-highlight"><span>Начислено</span><b id="statTotal">—</b><small id="statPeriodLabel">За месяц</small></div>
+  <div class="stat-tile"><span>Рабочих дней</span><b id="statWorkDays">—</b><small>Сохранено</small></div>
+  <div class="stat-tile"><span>Заказов ЗН</span><b id="statOrders">—</b><small>Всего</small></div>
+  <div class="stat-tile"><span>Переработка</span><b id="statOvertime">—</b><small>Часов</small></div>
+</div>
+<div class="stats-subhead">Заработок по дням</div>
+<div id="statsChart" class="stats-chart"><p class="message">Загружаем статистику…</p></div>
+<div class="stats-breakdown">
+  <div><span>Оклад</span><b id="statSalary">—</b></div>
+  <div><span>За вес</span><b id="statWeightPay">—</b></div>
+  <div><span>За точки</span><b id="statPointsPay">—</b></div>
+  <div><span>Переработка</span><b id="statOvertimePay">—</b></div>
+</div>
+<div class="stats-forecast">
+  <span>Прогноз до конца месяца</span>
+  <b id="statForecast">—</b>
+  <small id="statForecastNote">Оценка по среднему начислению за сохранённые рабочие дни</small>
+</div>
+<div class="stats-compare" id="statsCompare">Сравнение с предыдущим месяцем появится при наличии данных.</div>
+<button id="exportStatsBtn" class="secondary" style="width:100%;margin-top:12px">Экспорт таблицы для Excel (CSV)</button>
+<p class="message" id="statsMessage">Статистика строится по данным, уже загруженным на это устройство.</p>
+</section>
 <section class="card">
 <div class="section-head"><h2>Рабочий день</h2><button id="todayBtn" class="text-btn">Сегодня</button></div>
 <div class="form-grid">
