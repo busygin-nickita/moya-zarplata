@@ -471,10 +471,10 @@ async function renderStats(){
 
  if(period==='year'){
   selectedDays=allDays.filter(d=>String(d.date||'').startsWith(selected+'-'));
-  $('statsPeriodLabel').textContent='За '+selected+' год';
+  if($('statsPeriodLabel')) $('statsPeriodLabel').textContent='За '+selected+' год';
  }else{
   selectedDays=allDays.filter(d=>monthKeyFromDate(d.date)===selected);
-  $('statsPeriodLabel').textContent='За '+(selected?new Date(selected+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'long',year:'numeric'}):'месяц');
+  if($('statsPeriodLabel')) $('statsPeriodLabel').textContent='За '+(selected?new Date(selected+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'long',year:'numeric'}):'месяц');
  }
 
  selectedDays.sort((a,b)=>a.date.localeCompare(b.date));
