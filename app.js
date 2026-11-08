@@ -5,6 +5,7 @@ const rates={salary:43400,kg:0.87,point:22.20,tek:0.5,overtime:500};
 const rub=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n)+' ₽';
 const today=new Date(), pad=n=>String(n).padStart(2,'0');
 const monthNow=`${today.getFullYear()}-${pad(today.getMonth()+1)}`;
+function localDateString(d=new Date()){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;}
 function openDB(){return new Promise((resolve,reject)=>{const r=indexedDB.open(dbName,1);r.onupgradeneeded=()=>r.result.createObjectStore(store,{keyPath:'key'});r.onsuccess=()=>{db=r.result;resolve(db)};r.onerror=()=>reject(r.error)})}
 function tx(mode='readonly'){return db.transaction(store,mode).objectStore(store)}
 function get(key){return new Promise((res,rej)=>{const r=tx().get(key);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})}
@@ -36,6 +37,9 @@ function renderCalc(){
  $('monthLabel').textContent=new Date(d.month+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
 }
 async function loadDay(date){
+ if(!date)return;
+ // Сначала обновляем облачную историю выбранного месяца, затем читаем локальную копию.
+ await pullMonth(date.slice(0,7),true);
  const key=date;let d=await get(key);
  $('date').value=date;$('month').value=date.slice(0,7);
  if(!d){orders=[emptyOrder()];missed=[];$('status').value='Рабочий';$('driver').value='';$('pallets').value=0;$('overtime').value=0}
@@ -63,6 +67,41 @@ async function api(action,payload={}){
  }
  const response=await fetch(cfg.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({token:token,action,...outgoing})});
  const result=await response.json();if(!result.ok)throw new Error(result.error||'Ошибка API');return result;
+}
+// Загружает дни выбранного месяца из Google Таблиц в локальную базу.
+async function pullMonth(month, quiet=false){
+ if(!navigator.onLine)return {loaded:0};
+ const cfg=window.APP_CONFIG||{};
+ if(!cfg.API_URL||!localStorage.getItem('MZ_API_TOKEN'))return {loaded:0};
+ try{
+  const result=await api('getMonthDays',{month});
+  const localDays=(await all()).filter(d=>d.month===month);
+  const localByDate=new Map(localDays.map(d=>[d.date,d]));
+  let loaded=0;
+  for(const cloudDay of (result.days||[])){
+   const local=localByDate.get(cloudDay.date);
+   // Несинхронизированные изменения на iPhone не затираем облачной копией.
+   if(local && !local.synced)continue;
+   const day={
+    ...cloudDay,
+    key:cloudDay.date,
+    month:month,
+    synced:true,
+    syncedAt:local?.syncedAt||new Date().toISOString()
+   };
+   await put(day);
+   loaded++;
+  }
+  if(!quiet){
+   $('message').textContent=loaded
+    ? `Загружено из Google Таблиц дней: ${loaded}`
+    : 'Облачная история проверена — новых дней нет';
+  }
+  return {loaded};
+ }catch(e){
+  if(!quiet)$('message').textContent='Не удалось загрузить историю из Google Таблиц: '+e.message;
+  return {loaded:0,error:e};
+ }
 }
 async function sync(){
  if(!navigator.onLine){$('message').textContent='Нет интернета. Данные останутся на iPhone.';return}
@@ -103,7 +142,7 @@ document.addEventListener('click',async e=>{
  if(el.id==='printBtn')buildReport();
  if(el.id==='tokenSave'){const t=$('apiToken').value.trim();if(t){localStorage.setItem('MZ_API_TOKEN',t);$('apiToken').value='';$('message').textContent='Токен сохранён локально на этом устройстве.'}else $('message').textContent='Вставь токен перед сохранением.'}
  if(el.id==='tokenClear'){localStorage.removeItem('MZ_API_TOKEN');$('apiToken').value='';$('message').textContent='Локальный токен удалён.'}
- if(el.id==='todayBtn')await loadDay(new Date().toISOString().slice(0,10));
+ if(el.id==='todayBtn')await loadDay(localDateString());
  if(el.dataset.load)await loadDay(el.dataset.load);
 });
 $('date').addEventListener('change',e=>loadDay(e.target.value));
@@ -111,5 +150,5 @@ $('month').addEventListener('change',async e=>{const d=e.target.value+'-01';awai
 $('status').addEventListener('change',renderCalc);$('driver').addEventListener('input',renderCalc);$('pallets').addEventListener('input',renderCalc);$('overtime').addEventListener('input',renderCalc);
 window.addEventListener('online',()=>{$('net').textContent='Интернет есть';$('net').className='pill green';sync()});
 window.addEventListener('offline',()=>{$('net').textContent='Без интернета';$('net').className='pill'});
-(async()=>{try{await openDB();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');$('net').textContent=navigator.onLine?'Интернет есть':'Без интернета';$('net').className=navigator.onLine?'pill green':'pill';await loadDay(new Date().toISOString().slice(0,10));}catch(e){$('message').textContent='Ошибка локального хранилища: '+e.message}})();
+(async()=>{try{await openDB();if('serviceWorker'in navigator)navigator.serviceWorker.register('./sw.js');$('net').textContent=navigator.onLine?'Интернет есть':'Без интернета';$('net').className=navigator.onLine?'pill green':'pill';await loadDay(localDateString());}catch(e){$('message').textContent='Ошибка локального хранилища: '+e.message}})();
 })();
