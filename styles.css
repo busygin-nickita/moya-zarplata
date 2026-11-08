@@ -208,3 +208,52 @@ main{max-width:760px;margin:auto;padding:0 14px 26px;display:grid;gap:14px}.card
   #statistics .stat-tile{min-height:88px;padding:11px}
   #statistics .stats-bar-row{grid-template-columns:29px minmax(0,1fr) 72px;gap:7px}
 }
+
+
+
+/* Calendar, order analytics and bottom navigation */
+html{scroll-behavior:smooth;scroll-padding-top:90px}
+body{padding-bottom:92px}
+.feature-card{scroll-margin-top:16px}
+.calendar-switch{display:flex;align-items:center;gap:6px}
+.calendar-switch input{width:142px;min-width:0;padding:8px 7px;border-radius:11px;font-size:12px;background:#101215;border:1px solid #393d43;color:#fff}
+.icon-btn{width:32px;height:34px;border-radius:10px;background:#272b30;color:#ff9b36;border:1px solid #3b4047;font-size:22px;line-height:1}
+.calendar-weekdays,.earnings-calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.calendar-weekdays{margin:14px 0 7px}
+.calendar-weekdays span{text-align:center;color:#858b94;font-size:10px;font-weight:800}
+.calendar-day,.calendar-empty{min-width:0;aspect-ratio:1/1;border-radius:11px}
+.calendar-day{border:1px solid rgba(255,255,255,.06);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:#e9eaec;font-size:13px;background:#202328}
+.calendar-day small{font-size:8px;color:#f6c18e}
+.calendar-day.level-0{background:#202328;color:#8e949d}
+.calendar-day.level-1{background:#56351f}
+.calendar-day.level-2{background:#81451d}
+.calendar-day.level-3{background:#b65b16}
+.calendar-day.level-4{background:#f28b2e;color:#17191c;font-weight:800}
+.calendar-day.selected{outline:2px solid #fff;outline-offset:1px}
+.calendar-legend{display:flex;align-items:center;justify-content:flex-end;gap:5px;margin:12px 0;color:#9298a1;font-size:9px}
+.calendar-legend i{width:12px;height:12px;border-radius:4px;background:#202328}
+.calendar-legend .level-1{background:#56351f}.calendar-legend .level-2{background:#81451d}.calendar-legend .level-3{background:#b65b16}.calendar-legend .level-4{background:#f28b2e}
+.calendar-summary{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:13px}
+.calendar-summary>div{display:flex;flex-direction:column;gap:5px;padding:12px;border-radius:12px;background:#202328}
+.calendar-summary span{font-size:10px;color:#9da3ac}
+.calendar-summary b{font-size:16px;color:#ffad52}
+.calendar-detail{margin-top:12px;padding:13px;border:1px solid rgba(255,145,45,.22);border-radius:13px;background:rgba(255,255,255,.025);font-size:12px;color:#b8bec6}
+.detail-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;color:#f1f1f1}
+.detail-head strong{color:#ffad52}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.detail-grid span{display:flex;justify-content:space-between;gap:5px;color:#9299a2;font-size:10px}
+.detail-grid b{color:#f3f3f3}
+.detail-open{width:100%;margin-top:12px;min-height:40px}
+.order-analytics-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.analytics-tile{display:flex;flex-direction:column;gap:8px;padding:14px;border-radius:13px;background:linear-gradient(145deg,#22262b,#17191d);border:1px solid rgba(255,255,255,.07);min-width:0}
+.analytics-tile span{font-size:10px;color:#9ea5ae}
+.analytics-tile b{font-size:20px;color:#f6f6f6;overflow-wrap:anywhere}
+.analytics-note{margin-top:12px;color:#8e959e;font-size:10px;line-height:1.5}
+#historySection{scroll-margin-top:16px}
+.bottom-nav{position:fixed;z-index:50;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:8px;border:1px solid rgba(255,255,255,.12);border-radius:19px;background:rgba(20,22,25,.94);backdrop-filter:blur(18px);box-shadow:0 8px 30px rgba(0,0,0,.45)}
+.nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:52px;border:0;border-radius:12px;background:transparent;color:#9298a1}
+.nav-item span{font-size:20px;line-height:1}
+.nav-item small{font-size:9px;font-weight:700}
+.nav-item.active{background:rgba(242,139,46,.13);color:#ff9b36}
+@media(min-width:700px){.bottom-nav{left:50%;right:auto;width:420px;transform:translateX(-50%)}}
+@media(max-width:380px){.calendar-switch input{width:118px}.calendar-weekdays,.earnings-calendar{gap:4px}.calendar-day{border-radius:8px}.analytics-tile{padding:11px}}
