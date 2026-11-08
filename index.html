@@ -9,7 +9,7 @@
 <body>
 <header class="top"><div><div class="eyebrow">ЛИЧНЫЙ УЧЁТ</div><h1>Моя зарплата</h1></div><span id="net" class="pill">Проверка сети…</span></header>
 <main>
-<section class="hero card"><div class="eyebrow light">НАЧИСЛЕНО ЗА МЕСЯЦ</div><div id="monthTotal" class="money">0 ₽</div><div class="hero-bottom"><span id="monthLabel"></span><span id="syncLabel">Только на этом устройстве</span></div></section>
+<section class="hero card" id="homeSection"><div class="eyebrow light">НАЧИСЛЕНО ЗА МЕСЯЦ</div><div id="monthTotal" class="money">0 ₽</div><div class="hero-bottom"><span id="monthLabel"></span><span id="syncLabel">Только на этом устройстве</span></div></section>
 <section class="card stats-card" id="statistics">
 <div class="section-head"><h2>Статистика</h2><span class="pill">По сохранённым дням</span></div>
 <div class="stats-controls">
@@ -43,7 +43,44 @@
 <button id="exportStatsBtn" class="secondary" style="width:100%;margin-top:12px">Экспорт таблицы для Excel (CSV)</button>
 <p class="message" id="statsMessage">Статистика строится по данным, уже загруженным на это устройство.</p>
 </section>
-<section class="card">
+
+<section class="card feature-card" id="calendarSection">
+ <div class="section-head">
+  <h2>Календарь заработка</h2>
+  <div class="calendar-switch">
+   <button type="button" class="icon-btn" id="calendarPrev" aria-label="Предыдущий месяц">‹</button>
+   <input id="calendarMonth" type="month" aria-label="Месяц календаря">
+   <button type="button" class="icon-btn" id="calendarNext" aria-label="Следующий месяц">›</button>
+  </div>
+ </div>
+ <div class="calendar-weekdays">
+  <span>ПН</span><span>ВТ</span><span>СР</span><span>ЧТ</span><span>ПТ</span><span>СБ</span><span>ВС</span>
+ </div>
+ <input id="calendarSelectedDate" type="hidden" value="">\n <div id="earningsCalendar" class="earnings-calendar"></div>
+ <div class="calendar-legend">
+  <span>Меньше</span><i class="level-0"></i><i class="level-1"></i><i class="level-2"></i><i class="level-3"></i><i class="level-4"></i><span>Больше</span>
+ </div>
+ <div class="calendar-summary">
+  <div><span>Рабочих дней</span><b id="calendarWorkDays">0</b></div>
+  <div><span>Заработок за дни</span><b id="calendarTotal">0 ₽</b></div>
+ </div>
+ <div id="calendarDayDetail" class="calendar-detail">Выбери дату, чтобы посмотреть подробности.</div>
+</section>
+
+<section class="card feature-card" id="ordersAnalyticsSection">
+ <div class="section-head"><h2>Аналитика заказов</h2><span class="pill">За выбранный месяц</span></div>
+ <div class="order-analytics-grid">
+  <div class="analytics-tile"><span>Заказов ЗН</span><b id="analyticsOrders">0</b></div>
+  <div class="analytics-tile"><span>Общий вес</span><b id="analyticsWeight">0 кг</b></div>
+  <div class="analytics-tile"><span>Точки</span><b id="analyticsPoints">0</b></div>
+  <div class="analytics-tile"><span>Средний вес ЗН</span><b id="analyticsAverage">0 кг</b></div>
+  <div class="analytics-tile"><span>Невывозы</span><b id="analyticsMissed">0</b></div>
+  <div class="analytics-tile"><span>Переработка</span><b id="analyticsOvertime">0 ч</b></div>
+ </div>
+ <div class="analytics-note" id="analyticsNote">Показатели рассчитываются по сохранённым дням выбранного месяца.</div>
+</section>
+
+<section class="card" id="workDaySection">
 <div class="section-head"><h2>Рабочий день</h2><button id="todayBtn" class="text-btn">Сегодня</button></div>
 <div class="form-grid">
 <label>Месяц<input id="month" type="month"></label>
@@ -80,12 +117,22 @@
 <p class="message">Сформируй месячную ведомость для печати или сохранения в PDF.</p>
 <button id="printBtn" class="primary" style="width:100%;margin-top:10px">Сформировать отчёт и печать</button>
 </section>
-<section class="card">
-<div class="section-head"><h2>Дни месяца</h2><span id="pendingCount" class="pill">0 ожидают</span></div>
+<section class="card" id="historySection">
+<div class="section-head"><h2>История рабочих дней</h2><span id="pendingCount" class="pill">0 ожидают</span></div>
 <div id="daysList" class="days-list"></div>
 </section>
+
 </main>
-<section id="printReport" aria-hidden="true"></section>
+<nav class="bottom-nav" aria-label="Основная навигация">
+ <button type="button" class="nav-item active" data-nav="homeSection"><span>⌂</span><small>Главная</small></button>
+ <button type="button" class="nav-item" data-nav="calendarSection"><span>▦</span><small>Календарь</small></button>
+ <button type="button" class="nav-item" data-nav="ordersAnalyticsSection"><span>▥</span><small>Заказы</small></button>
+ <button type="button" class="nav-item" data-nav="historySection"><span>◷</span><small>История</small></button>
+</nav>
+<section id="printReport" aria-hidden="true></section>
+<footer>Локальное хранение · Google Sheets при подключении интернета</footer>
+<script src="config.js"></script><script src="app.js"></script>
+</body></html> aria-hidden="true"></section>
 <footer>Локальное хранение · Google Sheets при подключении интернета</footer>
 <script src="config.js"></script><script src="app.js"></script>
 </body></html>
