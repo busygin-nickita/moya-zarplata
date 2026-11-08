@@ -1,138 +1,971 @@
-<!doctype html>
-<html lang="ru">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#08090b"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icon.svg"><link rel="stylesheet" href="styles.css">
-<title>Моя зарплата</title>
-</head>
-<body>
-<header class="top"><div><div class="eyebrow">ЛИЧНЫЙ УЧЁТ</div><h1>Моя зарплата</h1></div><span id="net" class="pill">Проверка сети…</span></header>
-<main>
-<section class="hero card" id="homeSection"><div class="eyebrow light">НАЧИСЛЕНО ЗА МЕСЯЦ</div><div id="monthTotal" class="money">0 ₽</div><div class="hero-bottom"><span id="monthLabel"></span><span id="syncLabel">Только на этом устройстве</span></div></section>
-<section class="card stats-card" id="statistics">
-<div class="section-head"><h2>Статистика</h2><span class="pill">По сохранённым дням</span></div>
-<div class="stats-controls">
-  <select id="statsPeriod" aria-label="Период статистики">
-    <option value="month">Месяц</option>
-    <option value="year">Год</option>
-  </select>
-  <input id="statsMonth" type="month" aria-label="Выбрать месяц">
-  <input id="statsYear" type="number" min="2020" max="2100" aria-label="Выбрать год" hidden>
-</div>
-<div class="stats-grid">
-  <div class="stat-tile stat-highlight"><span>Начислено</span><b id="statTotal">—</b><small id="statsPeriodLabel">За месяц</small></div>
-  <div class="stat-tile"><span>Рабочих дней</span><b id="statWorkDays">—</b><small>Сохранено</small></div>
-  <div class="stat-tile"><span>Заказов ЗН</span><b id="statOrders">—</b><small>Всего</small></div>
-  <div class="stat-tile"><span>Переработка</span><b id="statOvertime">—</b><small>Часов</small></div>
-</div>
-<div class="stats-subhead">Заработок по дням</div>
-<div id="statsChart" class="stats-chart"><p class="message">Загружаем статистику…</p></div>
-<div class="stats-breakdown">
-  <div><span>Оклад</span><b id="statSalary">—</b></div>
-  <div><span>За вес</span><b id="statWeightPay">—</b></div>
-  <div><span>За точки</span><b id="statPointsPay">—</b></div>
-  <div><span>Переработка</span><b id="statOvertimePay">—</b></div>
-</div>
-<div class="stats-forecast">
-  <span>Прогноз до конца месяца</span>
-  <b id="statForecast">—</b>
-  <small id="statForecastNote">Оценка по среднему начислению за сохранённые рабочие дни</small>
-</div>
-<div class="stats-compare" id="statsCompare">Сравнение с предыдущим месяцем появится при наличии данных.</div>
-<button id="exportStatsBtn" class="secondary" style="width:100%;margin-top:12px">Экспорт таблицы для Excel (CSV)</button>
-<p class="message" id="statsMessage">Статистика строится по данным, уже загруженным на это устройство.</p>
-</section>
+(() => {
+const $=id=>document.getElementById(id), dbName='MoyaZarplataDB', store='days';
+let db, orders=[], missed=[], currentMonth='';
+const rates={salary:43400,kg:0.87,point:22.20,tek:0.5,overtime:500};
+const rub=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n)+' ₽';
+const today=new Date(), pad=n=>String(n).padStart(2,'0');
+const monthNow=`${today.getFullYear()}-${pad(today.getMonth()+1)}`;
 
-<section class="card feature-card" id="calendarSection">
- <div class="section-head">
-  <h2>Календарь заработка</h2>
-  <div class="calendar-switch">
-   <button type="button" class="icon-btn" id="calendarPrev" aria-label="Предыдущий месяц">‹</button>
-   <input id="calendarMonth" type="month" aria-label="Месяц календаря">
-   <button type="button" class="icon-btn" id="calendarNext" aria-label="Следующий месяц">›</button>
+function localDateString(d=new Date()){
+ return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+}
+
+function openDB(){
+ return new Promise((resolve,reject)=>{
+  const r=indexedDB.open(dbName,1);
+  r.onupgradeneeded=()=>r.result.createObjectStore(store,{keyPath:'key'});
+  r.onsuccess=()=>{db=r.result;resolve(db)};
+  r.onerror=()=>reject(r.error);
+ });
+}
+
+function tx(mode='readonly'){
+ return db.transaction(store,mode).objectStore(store);
+}
+
+function get(key){
+ return new Promise((res,rej)=>{
+  const r=tx().get(key);
+  r.onsuccess=()=>res(r.result);
+  r.onerror=()=>rej(r.error);
+ });
+}
+
+function all(){
+ return new Promise((res,rej)=>{
+  const r=tx().getAll();
+  r.onsuccess=()=>res(r.result||[]);
+  r.onerror=()=>rej(r.error);
+ });
+}
+
+function put(v){
+ return new Promise((res,rej)=>{
+  const r=tx('readwrite').put(v);
+  r.onsuccess=()=>res();
+  r.onerror=()=>rej(r.error);
+ });
+}
+
+function emptyOrder(){
+ return {zn:'',weight:'',points:'',type:'Обычная'};
+}
+
+function emptyMissed(){
+ return {number:'',category:'Возврат',reason:''};
+}
+
+function renderRows(){
+ $('orders').innerHTML=orders.map((o,i)=>`
+  <div class="order-row" data-i="${i}">
+   <label>
+    <span class="row-label">№ ЗН</span>
+    <input data-kind="order" data-field="zn" data-i="${i}" value="${esc(o.zn)}" placeholder="Номер">
+   </label>
+   <label>
+    <span class="row-label">Вес, т</span>
+    <input data-kind="order" data-field="weight" data-i="${i}" type="number" step="0.001" value="${esc(o.weight)}" placeholder="0">
+   </label>
+   <label>
+    <span class="row-label">Точки</span>
+    <input data-kind="order" data-field="points" data-i="${i}" type="number" step="1" value="${esc(o.points)}" placeholder="0">
+   </label>
+   <label>
+    <span class="row-label">Тип</span>
+    <select data-kind="order" data-field="type" data-i="${i}">
+     <option ${o.type==='Обычная'?'selected':''}>Обычная</option>
+     <option ${o.type==='ТЭК'?'selected':''}>ТЭК</option>
+    </select>
+   </label>
+   <button class="remove" data-remove="order" data-i="${i}" aria-label="Удалить">×</button>
   </div>
- </div>
- <div class="calendar-weekdays">
-  <span>ПН</span><span>ВТ</span><span>СР</span><span>ЧТ</span><span>ПТ</span><span>СБ</span><span>ВС</span>
- </div>
- <input id="calendarSelectedDate" type="hidden" value="">\n <div id="earningsCalendar" class="earnings-calendar"></div>
- <div class="calendar-legend">
-  <span>Меньше</span><i class="level-0"></i><i class="level-1"></i><i class="level-2"></i><i class="level-3"></i><i class="level-4"></i><span>Больше</span>
- </div>
- <div class="calendar-summary">
-  <div><span>Рабочих дней</span><b id="calendarWorkDays">0</b></div>
-  <div><span>Заработок за дни</span><b id="calendarTotal">0 ₽</b></div>
- </div>
- <div id="calendarDayDetail" class="calendar-detail">Выбери дату, чтобы посмотреть подробности.</div>
-</section>
+ `).join('');
 
-<section class="card feature-card" id="ordersAnalyticsSection">
- <div class="section-head"><h2>Аналитика заказов</h2><span class="pill">За выбранный месяц</span></div>
- <div class="order-analytics-grid">
-  <div class="analytics-tile"><span>Заказов ЗН</span><b id="analyticsOrders">0</b></div>
-  <div class="analytics-tile"><span>Общий вес</span><b id="analyticsWeight">0 кг</b></div>
-  <div class="analytics-tile"><span>Точки</span><b id="analyticsPoints">0</b></div>
-  <div class="analytics-tile"><span>Средний вес ЗН</span><b id="analyticsAverage">0 кг</b></div>
-  <div class="analytics-tile"><span>Невывозы</span><b id="analyticsMissed">0</b></div>
-  <div class="analytics-tile"><span>Переработка</span><b id="analyticsOvertime">0 ч</b></div>
- </div>
- <div class="analytics-note" id="analyticsNote">Показатели рассчитываются по сохранённым дням выбранного месяца.</div>
-</section>
+ $('missed').innerHTML=missed.map((m,i)=>`
+  <div class="missed-row">
+   <label>
+    <span class="row-label">№ заявки</span>
+    <input data-kind="missed" data-field="number" data-i="${i}" value="${esc(m.number)}">
+   </label>
+   <label>
+    <span class="row-label">Категория</span>
+    <select data-kind="missed" data-field="category" data-i="${i}">
+     ${['Возврат','Не едет','Не хватает','Отмена'].map(x=>`<option ${m.category===x?'selected':''}>${x}</option>`).join('')}
+    </select>
+   </label>
+   <label>
+    <span class="row-label">Причина / комментарий</span>
+    <input data-kind="missed" data-field="reason" data-i="${i}" value="${esc(m.reason)}" placeholder="Комментарий">
+   </label>
+   <button class="remove" data-remove="missed" data-i="${i}">×</button>
+  </div>
+ `).join('');
+}
 
-<section class="card" id="workDaySection">
-<div class="section-head"><h2>Рабочий день</h2><button id="todayBtn" class="text-btn">Сегодня</button></div>
-<div class="form-grid">
-<label>Месяц<input id="month" type="month"></label>
-<label>Дата<input id="date" type="date"></label>
-<label>Статус<select id="status"><option>Рабочий</option><option>Выходной</option></select></label>
-<label>Водитель<input id="driver" placeholder="ФИО"></label>
-<label>Поддоны<input id="pallets" type="number" min="0" step="1" value="0"></label>
-<label>Переработка, ч<input id="overtime" type="number" min="0" step="0.5" value="0"></label>
-</div>
-</section>
-<section class="card">
-<div class="section-head"><h2>Заказ-наряды</h2><button id="addOrder" class="small-btn">+ Добавить</button></div>
-<div id="orders"></div>
-<div class="totals"><div><span>Оплачиваемый вес</span><b id="weightTotal">0 кг</b></div><div><span>Точки</span><b id="pointsTotal">0</b></div><div><span>Оплата за вес</span><b id="weightPay">0 ₽</b></div><div><span>Оплата за точки</span><b id="pointsPay">0 ₽</b></div></div>
-</section>
-<section class="card">
-<div class="section-head"><h2>Невывыезженные заявки</h2><button id="addMissed" class="small-btn">+ Добавить</button></div>
-<div id="missed"></div>
-</section>
-<section class="card">
-<div class="section-head"><h2>Итог дня</h2><span class="pill green">Расчёт локально</span></div>
-<div class="day-total" id="dayTotal">0 ₽</div>
-<div class="actions"><button id="saveBtn" class="primary">Сохранить день</button><button id="syncBtn" class="secondary">Синхронизировать</button></div>
-<p id="message" class="message">Изменения сохраняются на этом iPhone.</p>
-</section>
-<section class="card">
-<div class="section-head"><h2>Подключение Google Sheets</h2><span class="pill">Настройка</span></div>
-<label>Секретный токен для этого устройства<input id="apiToken" type="password" autocomplete="off" placeholder="Вставь свой API_TOKEN"></label>
-<div class="actions" style="margin-top:10px"><button id="tokenSave" class="secondary">Сохранить токен</button><button id="tokenClear" class="secondary">Удалить токен</button></div>
-<p class="message">Токен хранится локально на этом iPhone и не включается в публичные файлы сайта.</p>
-</section>
-<section class="card">
-<div class="section-head"><h2>Отчёт за месяц</h2><span class="pill">A4 / PDF</span></div>
-<p class="message">Сформируй месячную ведомость для печати или сохранения в PDF.</p>
-<button id="printBtn" class="primary" style="width:100%;margin-top:10px">Сформировать отчёт и печать</button>
-</section>
-<section class="card" id="historySection">
-<div class="section-head"><h2>История рабочих дней</h2><span id="pendingCount" class="pill">0 ожидают</span></div>
-<div id="daysList" class="days-list"></div>
-</section>
+function esc(v){
+ return String(v??'').replace(/[&<>"']/g,c=>({
+  '&':'&amp;',
+  '<':'&lt;',
+  '>':'&gt;',
+  '"':'&quot;',
+  "'":'&#39;'
+ }[c]));
+}
 
-</main>
-<nav class="bottom-nav" aria-label="Основная навигация">
- <button type="button" class="nav-item active" data-nav="homeSection"><span>⌂</span><small>Главная</small></button>
- <button type="button" class="nav-item" data-nav="calendarSection"><span>▦</span><small>Календарь</small></button>
- <button type="button" class="nav-item" data-nav="ordersAnalyticsSection"><span>▥</span><small>Заказы</small></button>
- <button type="button" class="nav-item" data-nav="historySection"><span>◷</span><small>История</small></button>
-</nav>
-<section id="printReport" aria-hidden="true></section>
-<footer>Локальное хранение · Google Sheets при подключении интернета</footer>
-<script src="config.js"></script><script src="app.js"></script>
-</body></html> aria-hidden="true"></section>
-<footer>Локальное хранение · Google Sheets при подключении интернета</footer>
-<script src="config.js"></script><script src="app.js"></script>
-</body></html>
+function calc(d){
+ if(d.status==='Выходной'){
+  return {
+   weight:0,points:0,weightPay:0,
+   pointsPay:0,overtimePay:0,total:0
+  };
+ }
+
+ let weight=0,points=0;
+
+ (d.orders||[]).forEach(o=>{
+  const k=o.type==='ТЭК'?rates.tek:1;
+  weight+=(Number(o.weight)||0)*1000*k;
+  points+=(Number(o.points)||0)*k;
+ });
+
+ const weightPay=weight*rates.kg;
+ const pointsPay=points*rates.point;
+ const overtimePay=(Number(d.overtime)||0)*rates.overtime;
+
+ return {
+  weight,
+  points,
+  weightPay,
+  pointsPay,
+  overtimePay,
+  total:weightPay+pointsPay+overtimePay
+ };
+}
+
+function formData(){
+ return {
+  month:$('month').value,
+  date:$('date').value,
+  status:$('status').value,
+  driver:$('driver').value,
+  pallets:Number($('pallets').value)||0,
+  overtime:Number($('overtime').value)||0,
+  orders:orders.filter(o=>o.zn||Number(o.weight)||Number(o.points)),
+  undelivered:missed.filter(m=>m.number||m.reason),
+  updatedAt:new Date().toISOString(),
+  synced:false
+ };
+}
+
+function renderCalc(){
+ const d=formData(),c=calc(d);
+
+ $('weightTotal').textContent=(Math.round(c.weight*100)/100).toLocaleString('ru-RU')+' кг';
+ $('pointsTotal').textContent=(Math.round(c.points*100)/100).toLocaleString('ru-RU');
+ $('weightPay').textContent=rub(c.weightPay);
+ $('pointsPay').textContent=rub(c.pointsPay);
+ $('dayTotal').textContent=rub(c.total);
+
+ $('monthLabel').textContent=new Date(d.month+'-01T12:00:00').toLocaleDateString('ru-RU',{
+  month:'long',
+  year:'numeric'
+ });
+}
+
+async function loadDay(date){
+ if(!date)return;
+
+ await pullMonth(date.slice(0,7),true);
+
+ const key=date;
+ let d=await get(key);
+
+ $('date').value=date;
+ $('month').value=date.slice(0,7);
+
+ if(!d){
+  orders=[emptyOrder()];
+  missed=[];
+  $('status').value='Рабочий';
+  $('driver').value='';
+  $('pallets').value=0;
+  $('overtime').value=0;
+ }else{
+  // Убираем пустые строки заказов и невывозов.
+  orders=(d.orders||[]).filter(o=>
+   o.zn||Number(o.weight)||Number(o.points)
+  );
+
+  if(!orders.length)orders=[emptyOrder()];
+
+  missed=(d.undelivered||[]).filter(m=>
+   m.number||m.reason
+  );
+
+  $('status').value=d.status||'Рабочий';
+  $('driver').value=d.driver||'';
+  $('pallets').value=d.pallets||0;
+  $('overtime').value=d.overtime||0;
+ }
+
+ renderRows();
+ renderCalc();
+ await renderMonth();
+}
+
+async function renderMonth(){
+ const m=$('month').value;
+ const days=(await all()).filter(d=>d.month===m);
+
+ let total=rates.salary,pending=0;
+
+ days.forEach(d=>{
+  if(d.status!=='Выходной')total+=calc(d).total;
+  if(!d.synced)pending++;
+ });
+
+ $('monthTotal').textContent=rub(total);
+ $('pendingCount').textContent=pending+' ожидают';
+
+ $('syncLabel').textContent=pending
+  ?'Есть несинхронизированные данные'
+  :'Локальные данные сохранены';
+
+ renderCalendar(m);
+ renderOrderAnalytics(m);
+
+ $('daysList').innerHTML=
+  `<button id="restoreBtn" type="button">Восстановить всю историю из Google</button>`+
+  (
+   days.sort((a,b)=>a.date.localeCompare(b.date)).map(d=>`
+    <div class="day-item">
+     <span>${new Date(d.date+'T12:00:00').toLocaleDateString('ru-RU',{
+      day:'2-digit',
+      month:'long'
+     })} · ${esc(d.status||'Рабочий')}</span>
+     <span>${rub(calc(d).total)}</span>
+     <button data-load="${d.date}">Открыть</button>
+     <button class="remove" data-delete="${d.date}" title="Удалить день" aria-label="Удалить день">×</button>
+    </div>
+   `).join('')||
+   '<p class="message">За этот месяц пока нет сохранённых дней.</p>'
+  );
+}
+
+
+function monthDaysInCalendar(monthKey){
+ const [year,month]=monthKey.split('-').map(Number);
+ return new Date(year,month,0).getDate();
+}
+
+async function renderCalendar(monthKey=$('calendarMonth').value){
+ if(!monthKey)return;
+ const days=(await all()).filter(d=>d.month===monthKey);
+ const byDate=new Map(days.map(d=>[d.date,d]));
+ const [year,month]=monthKey.split('-').map(Number);
+ const firstDay=(new Date(year,month-1,1).getDay()+6)%7;
+ const count=monthDaysInCalendar(monthKey);
+ const amounts=days.map(d=>d.status==='Выходной'?0:calc(d).total);
+ const max=Math.max(1,...amounts);
+ let total=0,workDays=0;
+ const cells=[];
+ for(let i=0;i<firstDay;i++)cells.push('<span class="calendar-empty"></span>');
+ for(let day=1;day<=count;day++){
+  const date=monthKey+'-'+String(day).padStart(2,'0');
+  const record=byDate.get(date);
+  const amount=record&&record.status!=='Выходной'?calc(record).total:0;
+  if(record&&record.status!=='Выходной'){total+=amount;workDays++;}
+  const level=amount<=0?0:Math.min(4,Math.max(1,Math.ceil(amount/max*4)));
+  const selected=$('date').value===date?' selected':'';
+  const label=record?rub(amount):'Нет записи';
+  cells.push(`<button type="button" class="calendar-day level-${level}${selected}" data-calendar-date="${date}" aria-label="${date}: ${esc(label)}"><span>${day}</span>${record&&amount>0?`<small>${Math.round(amount/100)/10}к</small>`:''}</button>`);
+ }
+ $('earningsCalendar').innerHTML=cells.join('');
+ $('calendarWorkDays').textContent=String(workDays);
+ $('calendarTotal').textContent=rub(total);
+ const detailDate=$('calendarSelectedDate')?.value||'';
+ if(detailDate&&byDate.has(detailDate))showCalendarDetail(byDate.get(detailDate));
+}
+
+function showCalendarDetail(day){
+ const c=calc(day);
+ const orders=(day.orders||[]).filter(o=>o.zn||Number(o.weight)||Number(o.points));
+ $('calendarDayDetail').innerHTML=`
+  <div class="detail-head"><b>${new Date(day.date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}</b><strong>${day.status==='Выходной'?'Выходной':rub(c.total)}</strong></div>
+  <div class="detail-grid">
+   <span>Заказов ЗН <b>${orders.length}</b></span>
+   <span>Вес <b>${(c.weight/1000).toLocaleString('ru-RU',{maximumFractionDigits:2})} т</b></span>
+   <span>Точки <b>${c.points.toLocaleString('ru-RU')}</b></span>
+   <span>Переработка <b>${Number(day.overtime)||0} ч</b></span>
+  </div>
+  <button type="button" class="secondary detail-open" data-load="${day.date}">Открыть рабочий день</button>`;
+}
+
+async function renderOrderAnalytics(monthKey=$('month').value){
+ const days=(await all()).filter(d=>d.month===monthKey);
+ let count=0,weight=0,points=0,missed=0,overtime=0;
+ for(const d of days){
+  if(d.status==='Выходной')continue;
+  const orders=(d.orders||[]).filter(o=>o.zn||Number(o.weight)||Number(o.points));
+  count+=orders.length;
+  weight+=calc(d).weight;
+  points+=calc(d).points;
+  missed+=(d.undelivered||[]).filter(m=>m.number||m.reason).length;
+  overtime+=Number(d.overtime)||0;
+ }
+ $('analyticsOrders').textContent=String(count);
+ $('analyticsWeight').textContent=(weight/1000).toLocaleString('ru-RU',{maximumFractionDigits:2})+' т';
+ $('analyticsPoints').textContent=points.toLocaleString('ru-RU',{maximumFractionDigits:1});
+ $('analyticsAverage').textContent=count?(weight/count).toLocaleString('ru-RU',{maximumFractionDigits:0})+' кг':'0 кг';
+ $('analyticsMissed').textContent=String(missed);
+ $('analyticsOvertime').textContent=(Math.round(overtime*10)/10).toLocaleString('ru-RU')+' ч';
+ $('analyticsNote').textContent=days.length
+  ?`Учтено ${days.length} сохранённых дней за ${new Date(monthKey+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'long',year:'numeric'})}.`
+  :'За выбранный месяц пока нет сохранённых дней.';
+}
+
+async function save(){
+ const d=formData();
+
+ if(!d.date){
+  $('message').textContent='Выбери дату.';
+  return;
+ }
+
+ d.key=d.date;
+ await put(d);
+
+ $('message').textContent='Сохранено на этом iPhone · '+new Date().toLocaleTimeString('ru-RU',{
+  hour:'2-digit',
+  minute:'2-digit'
+ });
+
+ await renderMonth();
+ renderCalc();
+ await renderStats();
+
+ if(navigator.onLine)await sync();
+}
+
+async function api(action,payload={}){
+ const cfg=window.APP_CONFIG||{};
+ const token=localStorage.getItem('MZ_API_TOKEN')||'';
+
+ if(!cfg.API_URL||!token){
+  throw new Error('Укажите URL Apps Script в config.js и сохраните токен в настройках приложения');
+ }
+
+ const outgoing={...payload};
+
+ if(action==='saveDay'&&outgoing.day){
+  const d=outgoing.day;
+
+  outgoing.day={
+   ...d,
+   overtimeHours:d.overtime,
+   orders:(d.orders||[]).map(o=>({
+    number:o.zn,
+    weightTonnes:o.weight,
+    points:o.points,
+    type:o.type
+   })),
+   undelivered:(d.undelivered||[]).map(m=>({
+    number:m.number,
+    category:m.category,
+    reason:m.reason
+   }))
+  };
+ }
+
+ const response=await fetch(cfg.API_URL,{
+  method:'POST',
+  headers:{'Content-Type':'text/plain;charset=utf-8'},
+  body:JSON.stringify({token:token,action,...outgoing})
+ });
+
+ const result=await response.json();
+
+ if(!result.ok)throw new Error(result.error||'Ошибка API');
+
+ return result;
+}
+
+// Загружает дни выбранного месяца из Google Таблиц в локальную базу.
+async function pullMonth(month,quiet=false){
+ if(!navigator.onLine)return {loaded:0};
+
+ const cfg=window.APP_CONFIG||{};
+
+ if(!cfg.API_URL||!localStorage.getItem('MZ_API_TOKEN')){
+  return {loaded:0};
+ }
+
+ try{
+  const result=await api('getMonthDays',{month});
+
+  const localDays=(await all()).filter(d=>d.month===month);
+  const localByDate=new Map(localDays.map(d=>[d.date,d]));
+
+  let loaded=0;
+
+  for(const cloudDay of (result.days||[])){
+   const local=localByDate.get(cloudDay.date);
+
+   // Несинхронизированные изменения на iPhone не затираем облачной копией.
+   if(local&&!local.synced)continue;
+
+   const day={
+    ...cloudDay,
+
+    // Убираем пустые строки, полученные из Google Таблиц.
+    orders:(cloudDay.orders||[]).filter(o=>
+     o.zn||Number(o.weight)||Number(o.points)
+    ),
+
+    undelivered:(cloudDay.undelivered||[]).filter(m=>
+     m.number||m.reason
+    ),
+
+    key:cloudDay.date,
+    month:month,
+    synced:true,
+    syncedAt:local?.syncedAt||new Date().toISOString()
+   };
+
+   await put(day);
+   loaded++;
+  }
+
+  if(!quiet){
+   $('message').textContent=loaded
+    ?`Загружено из Google Таблиц дней: ${loaded}`
+    :'Облачная история проверена — новых дней нет';
+  }
+
+  return {loaded};
+
+ }catch(e){
+  if(!quiet){
+   $('message').textContent='Не удалось загрузить историю из Google Таблиц: '+e.message;
+  }
+
+  return {loaded:0,error:e};
+ }
+}
+
+// Восстановление всей истории из всех месячных таблиц Google.
+async function restoreAll(){
+ if(!navigator.onLine){
+  $('message').textContent='Для восстановления нужен интернет.';
+  return;
+ }
+
+ $('message').textContent='Получаем список месяцев из Google Таблиц…';
+
+ try{
+  const list=await api('listMonths');
+
+  const months=(list.months||[])
+   .map(x=>x.month)
+   .filter(Boolean);
+
+  let loaded=0;
+
+  for(const month of months){
+   const result=await pullMonth(month,true);
+   loaded+=result.loaded||0;
+  }
+
+  const selectedDate=$('date').value||localDateString();
+
+  await loadDay(selectedDate);
+
+  $('message').textContent=
+   `Восстановление завершено. Обновлено дней: ${loaded}. Месяцев в облаке: ${months.length}.`;
+  await renderStats();
+
+ }catch(e){
+  $('message').textContent='Не удалось восстановить историю: '+e.message;
+ }
+}
+
+async function sync(){
+ if(!navigator.onLine){
+  $('message').textContent='Нет интернета. Данные останутся на iPhone.';
+  return;
+ }
+
+ const cfg=window.APP_CONFIG||{};
+
+ if(!cfg.API_URL||!localStorage.getItem('MZ_API_TOKEN')){
+  $('message').textContent='Локально сохранено. Настройте URL и токен для синхронизации.';
+  return;
+ }
+
+ $('message').textContent='Синхронизация…';
+
+ try{
+  const days=(await all()).filter(d=>!d.synced);
+
+  for(const d of days){
+   const result=await api('saveDay',{day:d});
+
+   d.synced=true;
+   d.spreadsheetId=result.spreadsheetId||d.spreadsheetId;
+   d.syncedAt=new Date().toISOString();
+
+   await put(d);
+  }
+
+  $('message').textContent=days.length
+   ?`Синхронизировано дней: ${days.length}`
+   :'Все дни уже синхронизированы';
+
+ }catch(e){
+  $('message').textContent='Не удалось синхронизировать: '+e.message;
+ }
+
+ await renderMonth();
+}
+
+
+function monthKeyFromDate(date){
+ return String(date||'').slice(0,7);
+}
+
+function statsPeriodValue(){
+ const period=$('statsPeriod').value;
+ return period==='year'?String($('statsYear').value||today.getFullYear()):$('statsMonth').value;
+}
+
+async function renderStats(){
+ const period=$('statsPeriod').value;
+ const selected=statsPeriodValue();
+ const allDays=await all();
+ let selectedDays=[];
+
+ if(period==='year'){
+  selectedDays=allDays.filter(d=>String(d.date||'').startsWith(selected+'-'));
+  if($('statsPeriodLabel')) $('statsPeriodLabel').textContent='За '+selected+' год';
+ }else{
+  selectedDays=allDays.filter(d=>monthKeyFromDate(d.date)===selected);
+  if($('statsPeriodLabel')) $('statsPeriodLabel').textContent='За '+(selected?new Date(selected+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'long',year:'numeric'}):'месяц');
+ }
+
+ selectedDays.sort((a,b)=>a.date.localeCompare(b.date));
+ const workDays=selectedDays.filter(d=>d.status!=='Выходной');
+ let variable=0,weightPay=0,pointsPay=0,overtimePay=0,overtimeHours=0,ordersCount=0,weightKg=0,points=0,missedCount=0;
+ const daily=selectedDays.map(d=>{
+  const c=calc(d);
+  if(d.status!=='Выходной'){
+   variable+=c.total;
+   weightPay+=c.weightPay;
+   pointsPay+=c.pointsPay;
+   overtimePay+=c.overtimePay;
+   weightKg+=c.weight;
+   points+=c.points;
+  }
+  overtimeHours+=Number(d.overtime)||0;
+  ordersCount+=(d.orders||[]).filter(o=>o.zn||Number(o.weight)||Number(o.points)).length;
+  missedCount+=(d.undelivered||[]).filter(m=>m.number||m.reason).length;
+  return {date:d.date,amount:c.total};
+ });
+
+ const monthsWithRecords=new Set(selectedDays.map(d=>monthKeyFromDate(d.date)));
+ const salary=period==='year'?rates.salary*monthsWithRecords.size:(selectedDays.length?rates.salary:0);
+ const total=salary+variable;
+
+ $('statTotal').textContent=rub(total);
+ $('statWorkDays').textContent=String(workDays.length);
+ $('statOrders').textContent=String(ordersCount);
+ $('statOvertime').textContent=(Math.round(overtimeHours*10)/10).toLocaleString('ru-RU')+' ч';
+ $('statSalary').textContent=rub(salary);
+ $('statWeightPay').textContent=rub(weightPay);
+ $('statPointsPay').textContent=rub(pointsPay);
+ $('statOvertimePay').textContent=rub(overtimePay);
+
+ const chartDays=daily.filter(x=>x.amount>0).slice(-12);
+ const max=Math.max(1,...chartDays.map(x=>x.amount));
+ $('statsChart').innerHTML=chartDays.length?chartDays.map(x=>{
+  const day=x.date.slice(-2);
+  const width=Math.max(2,Math.round(x.amount/max*100));
+  return `<div class="stats-bar-row"><span>${day}</span><div class="stats-bar-track"><div class="stats-bar-fill" style="width:${width}%"></div></div><b class="stats-bar-value">${rub(x.amount)}</b></div>`;
+ }).join(''):'<p class="message">Нет начислений за выбранный период.</p>';
+
+ // Forecast for the current month: fixed salary + average variable earnings
+ // per saved working day, projected across weekdays (Mon-Fri) in the month.
+ let forecastText='Недоступен для выбранного периода';
+ let forecastNote='Выбери текущий месяц для расчёта прогноза.';
+ if(period==='month'&&selected===monthNow){
+  const now=new Date();
+  const year=now.getFullYear();
+  const month=now.getMonth();
+  const daysInMonth=new Date(year,month+1,0).getDate();
+  let weekdaysInMonth=0;
+  for(let day=1;day<=daysInMonth;day++){
+   const weekday=new Date(year,month,day).getDay();
+   if(weekday!==0&&weekday!==6) weekdaysInMonth++;
+  }
+  const savedWorkDays=workDays.length;
+  if(savedWorkDays>0){
+   const averageVariablePerDay=variable/savedWorkDays;
+   const projectedVariable=averageVariablePerDay*weekdaysInMonth;
+   const projected=Math.round(rates.salary+projectedVariable);
+   forecastText=rub(projected);
+   forecastNote=`Оценка: оклад ${rub(rates.salary)} + средний переменный заработок за ${savedWorkDays} сохранённых рабочих дня, рассчитанный на ${weekdaysInMonth} будних дней месяца (график 5/2). Не является гарантированной суммой.`;
+  }else{
+   forecastText='Пока недостаточно данных';
+   forecastNote='Сохрани хотя бы один рабочий день, чтобы рассчитать прогноз.';
+  }
+ }
+ $('statForecast').textContent=forecastText;
+ $('statForecastNote').textContent=forecastNote;
+
+ // Compare selected month with previous month when both are month views.
+ if(period==='month'&&selected){
+  const d=new Date(selected+'-01T12:00:00');
+  d.setMonth(d.getMonth()-1);
+  const previousKey=`${d.getFullYear()}-${pad(d.getMonth()+1)}`;
+  const previousDays=allDays.filter(x=>monthKeyFromDate(x.date)===previousKey);
+  if(previousDays.length){
+   const previousTotal=rates.salary+previousDays.reduce((s,x)=>s+(x.status==='Выходной'?0:calc(x).total),0);
+   const diff=total-previousTotal;
+   const sign=diff>0?'+':'';
+   $('statsCompare').textContent=`По сравнению с ${d.toLocaleDateString('ru-RU',{month:'long',year:'numeric'})}: ${sign}${rub(diff)} (предыдущий месяц: ${rub(previousTotal)}).`;
+  }else{
+   $('statsCompare').textContent='Для сравнения с предыдущим месяцем пока недостаточно сохранённых данных.';
+  }
+ }else{
+  $('statsCompare').textContent=`Дополнительно: оплачиваемый вес ${Math.round(weightKg*100)/100} кг · точки ${Math.round(points*100)/100} · невывозы ${missedCount}.`;
+ }
+ $('statsMessage').textContent=`Учтено дней: ${selectedDays.length}. В годовом режиме оклад учитывается только за месяцы, в которых есть сохранённые дни.`;
+}
+
+async function exportStatsCSV(){
+ const period=$('statsPeriod').value;
+ const selected=statsPeriodValue();
+ const days=(await all()).filter(d=>period==='year'
+  ?String(d.date||'').startsWith(selected+'-')
+  :monthKeyFromDate(d.date)===selected
+ ).sort((a,b)=>a.date.localeCompare(b.date));
+
+ const rows=[['Дата','Статус','Водитель','Поддоны','Заказов ЗН','Вес, кг','Точки','Переработка, ч','Начислено за день, руб']];
+ for(const d of days){
+  const c=calc(d);
+  const orders=(d.orders||[]).filter(o=>o.zn||Number(o.weight)||Number(o.points));
+  rows.push([
+   d.date,d.status||'Рабочий',d.driver||'',d.pallets||0,orders.length,
+   Math.round(c.weight*100)/100,Math.round(c.points*100)/100,
+   Number(d.overtime)||0,Math.round(c.total*100)/100
+  ]);
+ }
+ const csv='\\uFEFF'+rows.map(row=>row.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\\r\\n');
+ const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+ const url=URL.createObjectURL(blob);
+ const a=document.createElement('a');
+ a.href=url;
+ a.download=`zarplata-${selected}.csv`;
+ document.body.appendChild(a);
+ a.click();
+ a.remove();
+ URL.revokeObjectURL(url);
+ $('statsMessage').textContent='Файл CSV подготовлен для открытия в Excel.';
+}
+
+function buildReport(){
+ const month=$('month').value||monthNow;
+
+ all().then(days=>{
+  const selected=days
+   .filter(d=>d.month===month)
+   .sort((a,b)=>a.date.localeCompare(b.date));
+
+  let total=0,workDays=0,orderCount=0,overtime=0,missedCount=0;
+
+  const rows=selected.map(d=>{
+   const c=calc(d);
+
+   if(d.status!=='Выходной'){
+    total+=c.total;
+    workDays++;
+   }
+
+   orderCount+=(d.orders||[]).filter(o=>
+    o.zn||Number(o.weight)||Number(o.points)
+   ).length;
+
+   overtime+=Number(d.overtime)||0;
+
+   missedCount+=(d.undelivered||[]).filter(m=>
+    m.number||m.reason
+   ).length;
+
+   return `<tr>
+    <td>${esc(d.date)}</td>
+    <td>${esc(d.status||'Рабочий')}</td>
+    <td>${esc(d.driver||'')}</td>
+    <td>${(d.orders||[]).filter(o=>o.zn||Number(o.weight)||Number(o.points)).length}</td>
+    <td>${rub(c.total)}</td>
+   </tr>`;
+  }).join('');
+
+  $('printReport').innerHTML=`
+   <div class="print-head">
+    <h1>Моя зарплата — отчёт за ${esc(month)}</h1>
+    <p>Сформировано: ${new Date().toLocaleString('ru-RU')}</p>
+   </div>
+
+   <div class="print-stats">
+    <div>Оклад: <b>${rub(rates.salary)}</b></div>
+    <div>Рабочих дней: <b>${workDays}</b></div>
+    <div>ЗН: <b>${orderCount}</b></div>
+    <div>Переработка: <b>${overtime} ч</b></div>
+    <div>Невывозы: <b>${missedCount}</b></div>
+    <div>Итого с окладом: <b>${rub(rates.salary+total)}</b></div>
+   </div>
+
+   <table>
+    <thead>
+     <tr>
+      <th>Дата</th>
+      <th>Статус</th>
+      <th>Водитель</th>
+      <th>ЗН</th>
+      <th>Начислено за день</th>
+     </tr>
+    </thead>
+    <tbody>
+     ${rows||'<tr><td colspan="5">За выбранный месяц нет сохранённых дней</td></tr>'}
+    </tbody>
+   </table>
+
+   <p class="print-note">
+    Невывозы учитываются отдельно и не уменьшают зарплату автоматически.
+    Расчёт предварительный по данным, сохранённым в приложении.
+   </p>
+  `;
+
+  $('printReport').classList.add('ready');
+  window.print();
+ });
+}
+
+document.addEventListener('input',e=>{
+ const el=e.target;
+
+ if(el.dataset.kind){
+  const arr=el.dataset.kind==='order'?orders:missed;
+  arr[Number(el.dataset.i)][el.dataset.field]=el.value;
+  renderCalc();
+
+ }else if(['driver','pallets','overtime','status'].includes(el.id)){
+  renderCalc();
+ }
+});
+
+document.addEventListener('change',e=>{
+ const el=e.target;
+
+ if(el.dataset.kind){
+  const arr=el.dataset.kind==='order'?orders:missed;
+  arr[Number(el.dataset.i)][el.dataset.field]=el.value;
+  renderCalc();
+ }
+});
+
+document.addEventListener('click',async e=>{
+ const el=e.target.closest('button');
+
+ if(!el)return;
+
+
+ if(el.id==='calendarPrev'||el.id==='calendarNext'){
+  const input=$('calendarMonth');
+  const [y,m]=input.value.split('-').map(Number);
+  const shift=el.id==='calendarPrev'?-1:1;
+  const next=new Date(y,m-1+shift,1);
+  input.value=next.getFullYear()+'-'+String(next.getMonth()+1).padStart(2,'0');
+  await renderCalendar(input.value);
+  $('calendarDayDetail').textContent='Выбери дату, чтобы посмотреть подробности.';
+ }
+ if(el.dataset.calendarDate){
+  const date=el.dataset.calendarDate;
+  const record=await get(date);
+  const detail=$('calendarDayDetail');
+  if(record){
+   $('calendarSelectedDate').value=date;
+   showCalendarDetail(record);
+  }else{
+   detail.innerHTML=`<div class="detail-head"><b>${new Date(date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}</b><span>Записи нет</span></div><button type="button" class="secondary detail-open" data-new-date="${date}">Добавить рабочий день</button>`;
+  }
+  await renderCalendar($('calendarMonth').value);
+ }
+ if(el.dataset.newDate){
+  await loadDay(el.dataset.newDate);
+  document.getElementById('workDaySection').scrollIntoView({behavior:'smooth',block:'start'});
+ }
+ if(el.dataset.nav){
+  document.getElementById(el.dataset.nav)?.scrollIntoView({behavior:'smooth',block:'start'});
+  document.querySelectorAll('.nav-item').forEach(btn=>btn.classList.toggle('active',btn===el));
+ }
+ if(el.id==='addOrder'&&orders.length<20){
+  orders.push(emptyOrder());
+  renderRows();
+ }
+
+ if(el.id==='addMissed'&&missed.length<20){
+  missed.push(emptyMissed());
+  renderRows();
+ }
+
+ if(el.dataset.remove){
+  const a=el.dataset.remove==='order'?orders:missed;
+  a.splice(Number(el.dataset.i),1);
+  renderRows();
+  renderCalc();
+ }
+
+ if(el.id==='saveBtn')await save();
+
+ if(el.id==='syncBtn')await sync();
+
+ if(el.id==='restoreBtn')await restoreAll();
+
+ if(el.dataset.delete){
+  const date=el.dataset.delete;
+
+  if(!navigator.onLine){
+   $('message').textContent='Для удаления дня сначала подключись к интернету.';
+   return;
+  }
+
+  if(!confirm('Удалить запись за '+date+' и из Google Таблиц? Это действие нельзя отменить.')){
+   return;
+  }
+
+  try{
+   await api('deleteDay',{
+    month:date.slice(0,7),
+    date
+   });
+
+   const request=tx('readwrite').delete(date);
+
+   await new Promise((resolve,reject)=>{
+    request.onsuccess=resolve;
+    request.onerror=()=>reject(request.error);
+   });
+
+   $('message').textContent='Запись за '+date+' удалена из приложения и Google Таблиц.';
+
+   if($('date').value===date){
+    await loadDay(localDateString());
+   }else{
+    await renderMonth();
+   }
+   await renderStats();
+
+  }catch(err){
+   $('message').textContent='Не удалось удалить запись: '+err.message;
+  }
+ }
+
+ if(el.id==='printBtn')buildReport();
+
+ if(el.id==='tokenSave'){
+  const t=$('apiToken').value.trim();
+
+  if(t){
+   localStorage.setItem('MZ_API_TOKEN',t);
+   $('apiToken').value='';
+   $('message').textContent='Токен сохранён локально на этом устройстве.';
+  }else{
+   $('message').textContent='Вставь токен перед сохранением.';
+  }
+ }
+
+ if(el.id==='tokenClear'){
+  localStorage.removeItem('MZ_API_TOKEN');
+  $('apiToken').value='';
+  $('message').textContent='Локальный токен удалён.';
+ }
+
+ if(el.id==='todayBtn'){
+  await loadDay(localDateString());
+ }
+
+ if(el.dataset.load){
+  await loadDay(el.dataset.load);
+ }
+});
+
+$('date').addEventListener('change',async e=>{
+ await loadDay(e.target.value);
+ $('calendarMonth').value=e.target.value.slice(0,7);
+ await renderCalendar($('calendarMonth').value);
+});
+
+$('month').addEventListener('change',async e=>{
+ const d=e.target.value+'-01';
+ await loadDay(d);
+ $('calendarMonth').value=e.target.value;
+ await renderCalendar(e.target.value);
+});
+
+$('status').addEventListener('change',renderCalc);
+$('driver').addEventListener('input',renderCalc);
+$('pallets').addEventListener('input',renderCalc);
+$('overtime').addEventListener('input',renderCalc);
+
+
+$('statsPeriod').addEventListener('change',async()=>{
+ const yearMode=$('statsPeriod').value==='year';
+ $('statsMonth').hidden=yearMode;
+ $('statsYear').hidden=!yearMode;
+ await renderStats();
+});
+$('statsMonth').addEventListener('change',async()=>{
+ await renderStats();
+ $('calendarMonth').value=$('statsMonth').value;
+ await renderCalendar($('calendarMonth').value);
+ await renderOrderAnalytics($('statsMonth').value);
+});
+$('statsYear').addEventListener('change',renderStats);
+$('exportStatsBtn').addEventListener('click',exportStatsCSV);
+$('calendarMonth').addEventListener('change',e=>renderCalendar(e.target.value));
+
+window.addEventListener('online',()=>{
+ $('net').textContent='Интернет есть';
+ $('net').className='pill green';
+ sync();
+});
+
+window.addEventListener('offline',()=>{
+ $('net').textContent='Без интернета';
+ $('net').className='pill';
+});
+
+(async()=>{
+ try{
+  await openDB();
+
+  if('serviceWorker'in navigator){
+   navigator.serviceWorker.register('./sw.js');
+  }
+
+  $('net').textContent=navigator.onLine?'Интернет есть':'Без интернета';
+  $('net').className=navigator.onLine?'pill green':'pill';
+
+  await loadDay(localDateString());
+  $('calendarMonth').value=monthNow;
+  $('calendarSelectedDate').value='';
+  $('statsMonth').value=monthNow;
+  $('statsYear').value=today.getFullYear();
+  await renderStats();
+
+ }catch(e){
+  $('message').textContent='Ошибка локального хранилища: '+e.message;
+ }
+})();
+
+})();
