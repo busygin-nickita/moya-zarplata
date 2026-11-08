@@ -23,3 +23,29 @@ main{max-width:760px;margin:auto;padding:0 14px 26px;display:grid;gap:14px}.card
  #printReport th{background:#eee}
  .print-note{margin-top:8mm;font-size:9pt}
 }
+
+
+/* Statistics */
+.stats-controls{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:4px 0 13px}
+.stats-controls select,.stats-controls input{min-height:42px}
+.stats-controls [hidden]{display:none}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.stat-tile{background:#101215;border:1px solid #2b2f34;border-radius:13px;padding:12px;display:grid;gap:5px;min-width:0}
+.stat-tile span,.stats-breakdown span,.stats-forecast span{font-size:11px;color:#a2a5aa}
+.stat-tile b{font-size:20px;letter-spacing:-.5px;overflow-wrap:anywhere}
+.stat-tile small,.stats-forecast small{font-size:10px;color:#777d85}
+.stat-highlight{border-color:rgba(255,121,0,.35);background:linear-gradient(145deg,rgba(255,121,0,.12),#101215)}
+.stat-highlight b{color:#ff9b24}
+.stats-subhead{font-size:13px;font-weight:750;margin:18px 0 10px}
+.stats-chart{display:grid;gap:9px}
+.stats-bar-row{display:grid;grid-template-columns:34px 1fr 82px;gap:8px;align-items:center;font-size:10px;color:#aeb2b8}
+.stats-bar-track{height:10px;background:#292d32;border-radius:20px;overflow:hidden}
+.stats-bar-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,#f36b00,#ffad39)}
+.stats-bar-value{text-align:right;color:#f4f4f4;font-variant-numeric:tabular-nums}
+.stats-breakdown{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.stats-breakdown div{display:flex;justify-content:space-between;gap:8px;padding:10px;background:#101215;border:1px solid #292d32;border-radius:10px;font-size:11px}
+.stats-breakdown b{font-size:11px;white-space:nowrap}
+.stats-forecast{display:grid;gap:6px;margin-top:13px;padding:13px;border:1px solid rgba(255,121,0,.3);border-radius:13px;background:rgba(255,121,0,.07)}
+.stats-forecast b{font-size:25px;color:#ff9b24}
+.stats-compare{font-size:11px;line-height:1.5;color:#b9bdc3;margin-top:12px}
+@media(max-width:360px){.stats-bar-row{grid-template-columns:28px 1fr 70px;gap:6px}.stats-bar-value{font-size:9px}}
