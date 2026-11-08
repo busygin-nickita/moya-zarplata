@@ -531,7 +531,7 @@ async function renderStats(){
    const weekday=new Date(year,month,day).getDay();
    if(weekday!==0&&weekday!==6) weekdaysInMonth++;
   }
-  const savedWorkDays=workDays;
+  const savedWorkDays=workDays.length;
   if(savedWorkDays>0){
    const averageVariablePerDay=variable/savedWorkDays;
    const projectedVariable=averageVariablePerDay*weekdaysInMonth;
