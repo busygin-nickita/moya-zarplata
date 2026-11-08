@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08090b"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest"><link rel="icon" href="icon.svg"><link rel="apple-touch-icon" href="icon.svg"><link rel="stylesheet" href="styles.css">
+<title>Моя зарплата</title>
+</head>
+<body>
+<header class="top"><div><div class="eyebrow">ЛИЧНЫЙ УЧЁТ</div><h1>Моя зарплата</h1></div><span id="net" class="pill">Проверка сети…</span></header>
+<main>
+<section class="hero card"><div class="eyebrow light">НАЧИСЛЕНО ЗА МЕСЯЦ</div><div id="monthTotal" class="money">0 ₽</div><div class="hero-bottom"><span id="monthLabel"></span><span id="syncLabel">Только на этом устройстве</span></div></section>
+<section class="card">
+<div class="section-head"><h2>Рабочий день</h2><button id="todayBtn" class="text-btn">Сегодня</button></div>
+<div class="form-grid">
+<label>Месяц<input id="month" type="month"></label>
+<label>Дата<input id="date" type="date"></label>
+<label>Статус<select id="status"><option>Рабочий</option><option>Выходной</option></select></label>
+<label>Водитель<input id="driver" placeholder="ФИО"></label>
+<label>Поддоны<input id="pallets" type="number" min="0" step="1" value="0"></label>
+<label>Переработка, ч<input id="overtime" type="number" min="0" step="0.5" value="0"></label>
+</div>
+</section>
+<section class="card">
+<div class="section-head"><h2>Заказ-наряды</h2><button id="addOrder" class="small-btn">+ Добавить</button></div>
+<div id="orders"></div>
+<div class="totals"><div><span>Оплачиваемый вес</span><b id="weightTotal">0 кг</b></div><div><span>Точки</span><b id="pointsTotal">0</b></div><div><span>Оплата за вес</span><b id="weightPay">0 ₽</b></div><div><span>Оплата за точки</span><b id="pointsPay">0 ₽</b></div></div>
+</section>
+<section class="card">
+<div class="section-head"><h2>Невывыезженные заявки</h2><button id="addMissed" class="small-btn">+ Добавить</button></div>
+<div id="missed"></div>
+</section>
+<section class="card">
+<div class="section-head"><h2>Итог дня</h2><span class="pill green">Расчёт локально</span></div>
+<div class="day-total" id="dayTotal">0 ₽</div>
+<div class="actions"><button id="saveBtn" class="primary">Сохранить день</button><button id="syncBtn" class="secondary">Синхронизировать</button></div>
+<p id="message" class="message">Изменения сохраняются на этом iPhone.</p>
+</section>
+<section class="card">
+<div class="section-head"><h2>Подключение Google Sheets</h2><span class="pill">Настройка</span></div>
+<label>Секретный токен для этого устройства<input id="apiToken" type="password" autocomplete="off" placeholder="Вставь свой API_TOKEN"></label>
+<div class="actions" style="margin-top:10px"><button id="tokenSave" class="secondary">Сохранить токен</button><button id="tokenClear" class="secondary">Удалить токен</button></div>
+<p class="message">Токен хранится локально на этом iPhone и не включается в публичные файлы сайта.</p>
+</section>
+<section class="card">
+<div class="section-head"><h2>Отчёт за месяц</h2><span class="pill">A4 / PDF</span></div>
+<p class="message">Сформируй месячную ведомость для печати или сохранения в PDF.</p>
+<button id="printBtn" class="primary" style="width:100%;margin-top:10px">Сформировать отчёт и печать</button>
+</section>
+<section class="card">
+<div class="section-head"><h2>Дни месяца</h2><span id="pendingCount" class="pill">0 ожидают</span></div>
+<div id="daysList" class="days-list"></div>
+</section>
+</main>
+<section id="printReport" aria-hidden="true"></section>
+<footer>Локальное хранение · Google Sheets при подключении интернета</footer>
+<script src="config.js"></script><script src="app.js"></script>
+</body></html>

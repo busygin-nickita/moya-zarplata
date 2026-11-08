@@ -1,0 +1,13 @@
+{
+  "name": "Моя зарплата",
+  "short_name": "Зарплата",
+  "description": "Личный учёт заказ-нарядов и зарплаты",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#08090b",
+  "theme_color": "#08090b",
+  "icons": [
+    {"src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any"}
+  ]
+}
