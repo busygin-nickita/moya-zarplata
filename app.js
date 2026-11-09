@@ -954,6 +954,10 @@ document.addEventListener('click',async e=>{
   await loadDay(el.dataset.newDate);
   document.getElementById('workDaySection').scrollIntoView({behavior:'smooth',block:'start'});
  }
+ if(el.id==='openMissedJournal'){
+  await renderMissedJournal();
+  $('missedJournalSection').scrollIntoView({behavior:'smooth',block:'start'});
+ }
  if(el.dataset.nav){
   document.getElementById(el.dataset.nav)?.scrollIntoView({behavior:'smooth',block:'start'});
   document.querySelectorAll('.nav-item').forEach(btn=>btn.classList.toggle('active',btn===el));
