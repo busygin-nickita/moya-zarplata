@@ -2,6 +2,44 @@
 const $=id=>document.getElementById(id), dbName='MoyaZarplataDB', store='days';
 let db, orders=[], missed=[], currentMonth='';
 const rates={salary:43400,kg:0.87,point:22.20,tek:0.5,overtime:500,taxRate:0.13};
+function fillSettingsInputs(){
+ $('settingSalary').value=rates.salary;
+ $('settingKg').value=rates.kg;
+ $('settingPoint').value=rates.point;
+ $('settingTek').value=(rates.tek*100).toFixed(2).replace(/\\.?0+$/,'');
+ $('settingOvertime').value=rates.overtime;
+ $('settingTax').value=(rates.taxRate*100).toFixed(2).replace(/\\.?0+$/,'');
+}
+async function saveRateSettings(){
+ const token=localStorage.getItem('MZ_API_TOKEN');
+ if(!token){$('settingsMessage').textContent='Сначала сохраните API-токен в разделе Google Sheets.';return;}
+ const values={
+  salary:Number($('settingSalary').value),
+  kg:Number($('settingKg').value),
+  point:Number($('settingPoint').value),
+  tek:Number($('settingTek').value)/100,
+  overtime:Number($('settingOvertime').value),
+  taxRate:Number($('settingTax').value)/100
+ };
+ if(Object.values(values).some(v=>!Number.isFinite(v)||v<0)){
+  $('settingsMessage').textContent='Проверьте значения: они должны быть неотрицательными числами.';return;
+ }
+ if(values.tek>1||values.taxRate>1){
+  $('settingsMessage').textContent='Проценты должны быть в диапазоне от 0 до 100.';return;
+ }
+ $('settingsMessage').textContent='Сохраняем параметры в Google Таблицу…';
+ try{
+  const result=await api('saveSettings',{settings:values});
+  Object.assign(rates,result.settings||values);
+  fillSettingsInputs();
+  await renderMonth();
+  await renderStats();
+  renderCalc();
+  $('settingsMessage').textContent='Параметры сохранены в Google Таблице.';
+ }catch(err){
+  $('settingsMessage').textContent='Не удалось сохранить параметры: '+err.message;
+ }
+}
 // Резервный адрес API на случай, если config.js не загрузился.
 const APP_SCRIPT_API_URL='https://script.google.com/macros/s/AKfycbxrroyVWZ19npF_73tbRfNGKSiwakWNurOvN5Mm1NaKC0pWU31MzydysRLmZ2DgfmVb/exec';
 const rub=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n)+' ₽';
