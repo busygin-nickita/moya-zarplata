@@ -153,6 +153,38 @@ function renderRows(){
   </div>
  `).join('');
 }
+async function renderMissedJournal(){
+ const records=[];
+ const days=await all();
+ days.forEach(day=>{
+  (day.undelivered||[]).forEach((item,index)=>{
+   if(!item.number&&!item.reason)return;
+   records.push({date:day.date,driver:day.driver||'',item,index});
+  });
+ });
+ records.sort((a,b)=>b.date.localeCompare(a.date));
+ const query=($('missedJournalSearch')?.value||'').trim().toLowerCase();
+ const category=$('missedJournalCategory')?.value||'';
+ const month=$('missedJournalMonth')?.value||'';
+ const filtered=records.filter(r=>{
+  const haystack=[r.item.number,r.item.category,r.item.reason,r.driver].join(' ').toLowerCase();
+  return (!query||haystack.includes(query))&&(!category||r.item.category===category)&&(!month||r.date.startsWith(month));
+ });
+ $('missedJournalCount').textContent=String(filtered.length);
+ $('missedJournalTotal').textContent='Всего: '+records.length;
+ $('missedJournalList').innerHTML=filtered.length?filtered.map(r=>`
+  <article class="missed-journal-item">
+   <div class="missed-journal-top">
+    <b>${esc(r.item.number||'Без номера')}</b>
+    <span>${new Date(r.date+'T12:00:00').toLocaleDateString('ru-RU',{day:'2-digit',month:'short',year:'numeric'})}</span>
+   </div>
+   <div class="missed-journal-meta"><span>${esc(r.item.category||'Причина не указана')}</span>${r.driver?`<span>Водитель: ${esc(r.driver)}</span>`:''}</div>
+   ${r.item.reason?`<p>${esc(r.item.reason)}</p>`:''}
+   <button type="button" class="secondary missed-journal-open" data-load="${esc(r.date)}">Открыть рабочий день</button>
+  </article>
+ `).join(''):'<p class="message">Невывыезженных заявок по выбранным условиям нет.</p>';
+}
+
 function esc(v){
  return String(v??'').replace(/[&<>"']/g,c=>({
   '&':'&amp;',
@@ -272,6 +304,7 @@ async function loadDay(date){
  renderRows();
  renderCalc();
  await renderMonth();
+ await renderMissedJournal();
 }
 
 async function renderMonth(){
@@ -415,6 +448,7 @@ async function save(){
  await renderMonth();
  renderCalc();
  await renderStats();
+ await renderMissedJournal();
 
  if(navigator.onLine)await sync();
 }
@@ -859,6 +893,12 @@ function buildReport(){
  });
 }
 
+['missedJournalSearch','missedJournalCategory','missedJournalMonth'].forEach(id=>{
+ const el=$(id);
+ if(!el)return;
+ el.addEventListener(id==='missedJournalSearch'?'input':'change',renderMissedJournal);
+});
+
 document.addEventListener('input',e=>{
  const el=e.target;
 
@@ -1087,6 +1127,7 @@ window.addEventListener('offline',()=>{
   }
 
   await loadDay(localDateString());
+  await renderMissedJournal();
   $('calendarMonth').value=monthNow;
   $('calendarSelectedDate').value='';
   $('statsMonth').value=monthNow;
