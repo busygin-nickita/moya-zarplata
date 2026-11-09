@@ -297,3 +297,30 @@ body{padding-bottom:92px}
  .order-fields{grid-template-columns:1fr 1fr 1fr}
  .order-type-field{grid-column:auto}
 }
+
+
+/* Global undelivered requests journal */
+#openMissedJournal{width:100%;text-align:left;margin-top:8px}
+.missed-journal-summary{
+ display:flex;justify-content:space-between;align-items:center;gap:8px;
+ padding:11px 12px;margin-bottom:11px;border-radius:12px;
+ background:rgba(255,137,25,.08);border:1px solid rgba(255,137,25,.2)
+}
+.missed-journal-summary b{color:#ffad52;font-size:14px}
+.missed-journal-summary span{color:#9da3ac;font-size:10px;text-align:right}
+.missed-journal-filters{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.missed-journal-filters input,.missed-journal-filters select{min-height:43px;font-size:12px;padding:10px}
+#missedJournalSearch{grid-column:1/-1}
+.missed-journal-list{display:grid;gap:9px}
+.missed-journal-item{
+ padding:12px;border-radius:13px;background:linear-gradient(145deg,#202429,#14171a);
+ border:1px solid #343940;display:grid;gap:8px
+}
+.missed-journal-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.missed-journal-top b{font-size:14px;color:#f5f5f5}
+.missed-journal-top span{font-size:10px;color:#9da3ac;white-space:nowrap}
+.missed-journal-meta{display:flex;flex-wrap:wrap;gap:6px}
+.missed-journal-meta span{font-size:10px;padding:5px 8px;border-radius:20px;background:rgba(255,137,25,.12);color:#ffb15c}
+.missed-journal-item p{margin:0;color:#c4c8ce;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+.missed-journal-open{min-height:38px;padding:9px;font-size:11px}
+@media(max-width:380px){.missed-journal-filters{grid-template-columns:1fr}.missed-journal-filters>*{grid-column:1/-1}}
