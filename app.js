@@ -583,6 +583,7 @@ async function sync(){
 
  try{
   await loadRatesFromSheet();
+  fillSettingsInputs();
   await renderMonth();
   await renderStats();
   $('message').textContent='Настройки загружены. Синхронизация…';
@@ -915,9 +916,9 @@ document.addEventListener('click',async e=>{
 
  if(el.id==='saveBtn')await save();
 
- if(el.id==='syncBtn')await sync();
+ if(el.id==='syncBtn'||el.id==='settingsSyncBtn')await sync();
 
- if(el.id==='restoreBtn')await restoreAll();
+ if(el.id==='restoreBtn'||el.id==='settingsRestoreBtn')await restoreAll();
 
  if(el.dataset.delete){
   const date=el.dataset.delete;
@@ -960,6 +961,9 @@ document.addEventListener('click',async e=>{
 
  if(el.id==='printBtn')buildReport();
 
+ if(el.id==='saveRatesBtn')await saveRateSettings();
+ if(el.id==='exportStatsSettingsBtn')exportStatsCSV();
+
  if(el.id==='tokenSave'){
   const t=$('apiToken').value.trim();
 
@@ -972,6 +976,8 @@ document.addEventListener('click',async e=>{
     await renderMonth();
     await renderStats();
     $('message').textContent='Токен сохранён. Настройки Google Таблицы загружены.';
+    fillSettingsInputs();
+    $('settingsMessage').textContent='Настройки загружены из Google Таблицы.';
    }catch(err){
     $('message').textContent='Токен сохранён, но настройки не загрузились: '+err.message;
    }
