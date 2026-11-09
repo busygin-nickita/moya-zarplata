@@ -106,22 +106,22 @@ function renderRows(){
     <div class="order-card-head">
      <span class="order-index">${String(i+1).padStart(2,'0')}</span>
      <label class="order-number-field">
-      <span class="row-label">Номер заказа-наряда</span>
+      <span class="row-label"><svg class="field-icon"><use href="#i-tag"/></svg>Номер заказа-наряда</span>
       <input data-kind="order" data-field="zn" data-i="${i}" value="${esc(o.zn)}" placeholder="Например, ЗН-458732">
      </label>
      <button class="remove order-remove" data-remove="order" data-i="${i}" aria-label="Удалить заказ">×</button>
     </div>
     <div class="order-fields">
      <label>
-      <span class="row-label">Вес, т</span>
+      <span class="row-label"><svg class="field-icon"><use href="#i-weight"/></svg>Вес, т</span>
       <input data-kind="order" data-field="weight" data-i="${i}" type="number" min="0" step="0.001" value="${esc(o.weight)}" placeholder="0,000">
      </label>
      <label>
-      <span class="row-label">Количество точек</span>
+      <span class="row-label"><svg class="field-icon"><use href="#i-pin"/></svg>Количество точек</span>
       <input data-kind="order" data-field="points" data-i="${i}" type="number" min="0" step="1" value="${esc(o.points)}" placeholder="0">
      </label>
      <label class="order-type-field">
-      <span class="row-label">Тип заказа</span>
+      <span class="row-label"><svg class="field-icon"><use href="#i-package"/></svg>Тип заказа</span>
       <select data-kind="order" data-field="type" data-i="${i}">
        <option ${o.type==='Обычная'?'selected':''}>Обычная</option>
        <option ${o.type==='ТЭК'?'selected':''}>ТЭК</option>
@@ -136,17 +136,17 @@ function renderRows(){
  $('missed').innerHTML=missed.map((m,i)=>`
   <div class="missed-row">
    <label>
-    <span class="row-label">№ заявки</span>
+    <span class="row-label"><svg class="field-icon danger"><use href="#i-alert"/></svg>№ заявки</span>
     <input data-kind="missed" data-field="number" data-i="${i}" value="${esc(m.number)}">
    </label>
    <label>
-    <span class="row-label">Категория</span>
+    <span class="row-label"><svg class="field-icon"><use href="#i-tag"/></svg>Категория</span>
     <select data-kind="missed" data-field="category" data-i="${i}">
      ${['Возврат','Не едет','Не хватает','Отмена'].map(x=>`<option ${m.category===x?'selected':''}>${x}</option>`).join('')}
     </select>
    </label>
    <label>
-    <span class="row-label">Причина / комментарий</span>
+    <span class="row-label"><svg class="field-icon"><use href="#i-message"/></svg>Причина / комментарий</span>
     <input data-kind="missed" data-field="reason" data-i="${i}" value="${esc(m.reason)}" placeholder="Комментарий">
    </label>
    <button class="remove" data-remove="missed" data-i="${i}">×</button>
