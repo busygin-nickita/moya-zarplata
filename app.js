@@ -1,6 +1,7 @@
 (() => {
 const $=id=>document.getElementById(id), dbName='MoyaZarplataDB', store='days';
 let db, orders=[], missed=[], currentMonth='';
+let scannerControls=null, scannerReader=null, scanTargetIndex=null;
 const rates={salary:43400,kg:0.87,point:22.20,tek:0.5,overtime:500,taxRate:0.13};
 function fillSettingsInputs(){
  $('settingSalary').value=rates.salary;
@@ -95,6 +96,58 @@ function emptyMissed(){
  return {number:'',category:'Возврат',reason:''};
 }
 
+
+function stopOrderScanner(){
+ try{scannerControls?.stop();}catch(e){}
+ scannerControls=null;
+ try{scannerReader?.reset();}catch(e){}
+ scannerReader=null;
+ const video=$('scannerVideo');
+ if(video?.srcObject){
+  video.srcObject.getTracks().forEach(track=>track.stop());
+  video.srcObject=null;
+ }
+}
+function closeOrderScanner(){
+ stopOrderScanner();
+ $('scannerPanel').hidden=true;
+}
+async function startOrderScanner(index){
+ scanTargetIndex=index;
+ const panel=$('scannerPanel');
+ panel.hidden=false;
+ $('scannerMessage').textContent='Запрашиваем доступ к камере…';
+ panel.scrollIntoView({behavior:'smooth',block:'center'});
+ if(!window.ZXingBrowser?.BrowserMultiFormatReader){
+  $('scannerMessage').textContent='Модуль сканирования не загрузился. Проверь интернет и обнови страницу.';
+  return;
+ }
+ try{
+  stopOrderScanner();
+  scannerReader=new window.ZXingBrowser.BrowserMultiFormatReader();
+  $('scannerMessage').textContent='Наведи камеру на штрихкод или QR-код заказа.';
+  scannerControls=await scannerReader.decodeFromVideoDevice(undefined,$('scannerVideo'),(result,error)=>{
+   if(result){
+    const value=String(result.getText()||'').trim();
+    if(!value)return;
+    if(!orders[scanTargetIndex])orders[scanTargetIndex]=emptyOrder();
+    orders[scanTargetIndex].zn=value;
+    renderRows();
+    renderCalc();
+    $('message').textContent='Номер ЗН считан: '+value+'. Не забудь сохранить рабочий день.';
+    closeOrderScanner();
+   }
+  });
+ }catch(err){
+  $('scannerMessage').textContent=err?.name==='NotAllowedError'
+   ?'Нет доступа к камере. Разреши использование камеры для сайта в настройках Safari.'
+   :err?.name==='NotFoundError'
+    ?'Камера не найдена на устройстве.'
+    :'Не удалось запустить камеру: '+(err.message||err);
+  stopOrderScanner();
+ }
+}
+
 function renderRows(){
  $('orders').innerHTML=orders.map((o,i)=>{
   const coefficient=o.type==='ТЭК'?rates.tek:1;
@@ -107,7 +160,7 @@ function renderRows(){
      <span class="order-index">${String(i+1).padStart(2,'0')}</span>
      <label class="order-number-field">
       <span class="row-label"><svg class="field-icon"><use href="#i-tag"/></svg>Номер заказа-наряда</span>
-      <input data-kind="order" data-field="zn" data-i="${i}" value="${esc(o.zn)}" placeholder="Например, ЗН-458732">
+      <div class="order-number-input"><input data-kind="order" data-field="zn" data-i="${i}" value="${esc(o.zn)}" placeholder="Например, ЗН-458732"><button type="button" class="scan-inline-btn" data-scan-order="${i}" aria-label="Сканировать штрихкод"><svg><use href="#i-scan"/></svg></button></div>
      </label>
      <button class="remove order-remove" data-remove="order" data-i="${i}" aria-label="Удалить заказ">×</button>
     </div>
@@ -962,6 +1015,16 @@ document.addEventListener('click',async e=>{
   document.getElementById(el.dataset.nav)?.scrollIntoView({behavior:'smooth',block:'start'});
   document.querySelectorAll('.nav-item').forEach(btn=>btn.classList.toggle('active',btn===el));
  }
+ if(el.id==='scanNewOrder'){
+  let index=orders.findIndex(o=>!String(o.zn||'').trim());
+  if(index<0&&orders.length<20){orders.push(emptyOrder());index=orders.length-1;renderRows();}
+  if(index<0){$('message').textContent='Достигнут лимит в 20 заказов за день.';return;}
+  await startOrderScanner(index);
+ }
+ if(el.dataset.scanOrder!==undefined){
+  await startOrderScanner(Number(el.dataset.scanOrder));
+ }
+ if(el.id==='closeScanner'||el.id==='stopScanner')closeOrderScanner();
  if(el.id==='addOrder'&&orders.length<20){
   orders.push(emptyOrder());
   renderRows();
@@ -1118,7 +1181,7 @@ window.addEventListener('offline',()=>{
   await openDB();
 
   if('serviceWorker'in navigator){
-   navigator.serviceWorker.register('./sw.js?v=17',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
+   navigator.serviceWorker.register('./sw.js?v=18',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
   }
 
   $('net').textContent=navigator.onLine?'Интернет есть':'Без интернета';
