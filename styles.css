@@ -348,3 +348,27 @@ body{padding-bottom:92px}
  .inline-icon{width:13px;height:13px;flex-basis:13px}
  .field-icon{width:13px;height:13px;flex-basis:13px}
 }
+
+/* Camera barcode / QR scanner */
+.order-head-actions{display:flex;align-items:center;gap:7px}
+.scan-btn{display:inline-flex;align-items:center;gap:6px}
+.button-icon{width:16px;height:16px;display:inline-block;vertical-align:middle;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.order-number-input{display:flex;gap:6px;align-items:stretch}
+.order-number-input input{flex:1;min-width:0}
+.scan-inline-btn{width:44px;min-width:44px;min-height:44px;border:1px solid rgba(255,151,54,.35);border-radius:12px;background:rgba(255,139,35,.1);color:#ffad52;display:grid;place-items:center}
+.scan-inline-btn svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.scanner-panel{margin:12px 0;padding:13px;border:1px solid rgba(255,145,45,.35);border-radius:16px;background:linear-gradient(145deg,#202429,#111417)}
+.scanner-panel[hidden]{display:none}
+.scanner-panel-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.scanner-panel-head b{display:flex;align-items:center;gap:7px;color:#ffad52}
+.scanner-panel-head p,.scanner-hint{margin:6px 0 10px;color:#aeb3bb;font-size:12px;line-height:1.4}
+.scanner-video-wrap{position:relative;overflow:hidden;border-radius:13px;background:#050607;aspect-ratio:4/3;max-height:320px}
+.scanner-video-wrap video{width:100%;height:100%;object-fit:cover}
+.scanner-target{position:absolute;left:12%;right:12%;top:28%;height:44%;border:2px solid #ff981f;border-radius:13px;box-shadow:0 0 0 999px rgba(0,0,0,.16);pointer-events:none}
+.scanner-actions{display:flex;gap:8px;margin-top:10px}
+.scanner-actions button{flex:1}
+@media(max-width:380px){
+ .order-head-actions{gap:5px}
+ .order-head-actions .small-btn{padding:8px 9px;font-size:11px}
+ .scan-inline-btn{width:40px;min-width:40px}
+}
