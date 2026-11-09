@@ -362,7 +362,7 @@ async function save(){
 
 async function api(action,payload={}){
  const cfg=window.APP_CONFIG||{};
- const apiUrl=apiUrl||APP_SCRIPT_API_URL;
+ const apiUrl=cfg.API_URL||APP_SCRIPT_API_URL;
  const token=localStorage.getItem('MZ_API_TOKEN')||'';
 
  if(!apiUrl||!token){
@@ -407,7 +407,7 @@ async function api(action,payload={}){
 async function loadRatesFromSheet(){
  if(!navigator.onLine)throw new Error('Нет интернета для загрузки настроек.');
  const cfg=window.APP_CONFIG||{};
- const apiUrl=apiUrl||APP_SCRIPT_API_URL;
+ const apiUrl=cfg.API_URL||APP_SCRIPT_API_URL;
  if(!apiUrl)throw new Error('Не загружен URL Apps Script из config.js.');
  if(!localStorage.getItem('MZ_API_TOKEN'))throw new Error('Не сохранён API_TOKEN на этом устройстве.');
  const result=await api('getSettings');
@@ -424,7 +424,7 @@ async function pullMonth(month,quiet=false){
  if(!navigator.onLine)return {loaded:0};
 
  const cfg=window.APP_CONFIG||{};
- const apiUrl=apiUrl||APP_SCRIPT_API_URL;
+ const apiUrl=cfg.API_URL||APP_SCRIPT_API_URL;
 
  if(!apiUrl||!localStorage.getItem('MZ_API_TOKEN')){
   return {loaded:0};
