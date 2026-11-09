@@ -1,4 +1,4 @@
-const CACHE = 'salary-pwa-v17-settings-tab';
+const CACHE = 'salary-pwa-v18-order-form';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install', event => {
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
