@@ -402,7 +402,10 @@ async function api(action,payload={}){
 }
 
 async function loadRatesFromSheet(){
- if(!navigator.onLine||!localStorage.getItem('MZ_API_TOKEN'))return false;
+ if(!navigator.onLine)throw new Error('Нет интернета для загрузки настроек.');
+ const cfg=window.APP_CONFIG||{};
+ if(!cfg.API_URL)throw new Error('Не загружен URL Apps Script из config.js.');
+ if(!localStorage.getItem('MZ_API_TOKEN'))throw new Error('Не сохранён API_TOKEN на этом устройстве.');
  const result=await api('getSettings');
  const incoming=result.settings||{};
  ['salary','kg','point','tek','overtime','taxRate'].forEach(key=>{
@@ -517,16 +520,12 @@ async function sync(){
   return;
  }
 
- const cfg=window.APP_CONFIG||{};
-
- if(!cfg.API_URL||!localStorage.getItem('MZ_API_TOKEN')){
-  $('message').textContent='Локально сохранено. Настройте URL и токен для синхронизации.';
-  return;
- }
-
- $('message').textContent='Синхронизация…';
-
  try{
+  await loadRatesFromSheet();
+  await renderMonth();
+  await renderStats();
+  $('message').textContent='Настройки загружены. Синхронизация…';
+
   const days=(await all()).filter(d=>!d.synced);
 
   for(const d of days){
@@ -544,10 +543,11 @@ async function sync(){
    :'Все дни уже синхронизированы';
 
  }catch(e){
-  $('message').textContent='Не удалось синхронизировать: '+e.message;
+  $('message').textContent='Ошибка подключения: '+e.message;
  }
 
  await renderMonth();
+ await renderStats();
 }
 
 
@@ -905,7 +905,15 @@ document.addEventListener('click',async e=>{
   if(t){
    localStorage.setItem('MZ_API_TOKEN',t);
    $('apiToken').value='';
-   $('message').textContent='Токен сохранён локально на этом устройстве.';
+   $('message').textContent='Токен сохранён. Загружаем настройки…';
+   try{
+    await loadRatesFromSheet();
+    await renderMonth();
+    await renderStats();
+    $('message').textContent='Токен сохранён. Настройки Google Таблицы загружены.';
+   }catch(err){
+    $('message').textContent='Токен сохранён, но настройки не загрузились: '+err.message;
+   }
   }else{
    $('message').textContent='Вставь токен перед сохранением.';
   }
