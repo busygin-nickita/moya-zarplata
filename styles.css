@@ -263,3 +263,37 @@ body{padding-bottom:92px}
 .settings-section .settings-group h3{margin:0 0 10px;font-size:15px;color:#f3f3f3}
 .settings-section .form-grid{margin-top:12px}
 .settings-section .actions{margin-top:10px}
+
+
+/* Order entry redesign — keeps existing order fields and calculation model */
+#orders{display:grid;gap:11px}
+.order-card{
+ display:grid;gap:12px;padding:13px;border:1px solid #343940;border-radius:17px;
+ background:linear-gradient(145deg,#202429,#14171a);
+ box-shadow:inset 0 1px 0 rgba(255,255,255,.035)
+}
+.order-card-head{display:grid;grid-template-columns:30px minmax(0,1fr) 38px;gap:9px;align-items:end}
+.order-index{
+ width:30px;height:30px;display:grid;place-items:center;align-self:center;
+ border-radius:10px;background:rgba(255,137,25,.14);color:#ffad52;font-size:11px;font-weight:850
+}
+.order-number-field{min-width:0}
+.order-card label{font-size:11px;gap:6px}
+.order-card input,.order-card select{
+ min-height:46px;padding:11px 12px;border-radius:12px;font-size:15px;
+ background:#0d0f11;border-color:#3b4148
+}
+.order-remove{min-height:46px;width:38px;font-size:22px}
+.order-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.order-type-field{grid-column:1/-1}
+.order-card-total{
+ display:flex;align-items:center;justify-content:space-between;gap:10px;
+ padding:11px 12px;border:1px solid rgba(255,151,54,.23);border-radius:12px;
+ background:rgba(255,139,35,.07);font-size:11px;color:#aeb3bb
+}
+.order-card-total b{font-size:16px;color:#ffad52;font-variant-numeric:tabular-nums}
+#addOrder{min-height:43px;border-radius:12px}
+@media(min-width:520px){
+ .order-fields{grid-template-columns:1fr 1fr 1fr}
+ .order-type-field{grid-column:auto}
+}
