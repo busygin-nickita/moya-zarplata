@@ -6,9 +6,9 @@ function fillSettingsInputs(){
  $('settingSalary').value=rates.salary;
  $('settingKg').value=rates.kg;
  $('settingPoint').value=rates.point;
- $('settingTek').value=(rates.tek*100).toFixed(2).replace(/\\.?0+$/,'');
+ $('settingTek').value=Number((rates.tek*100).toFixed(2));
  $('settingOvertime').value=rates.overtime;
- $('settingTax').value=(rates.taxRate*100).toFixed(2).replace(/\\.?0+$/,'');
+ $('settingTax').value=Number((rates.taxRate*100).toFixed(2));
 }
 async function saveRateSettings(){
  const token=localStorage.getItem('MZ_API_TOKEN');
