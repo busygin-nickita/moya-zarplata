@@ -31,12 +31,12 @@
   <input id="statsYear" type="number" min="2020" max="2100" aria-label="Выбрать год" hidden>
 </div>
 <div class="stats-grid">
-  <div class="stat-tile stat-highlight"><span>Начислено</span><b id="statTotal">—</b><small id="statsPeriodLabel">За месяц</small></div>
-  <div class="stat-tile"><span>НДФЛ</span><b id="statTax">—</b><small>Ставка из Google Таблицы</small></div>
-  <div class="stat-tile stat-highlight"><span>К выплате</span><b id="statNet">—</b><small>После вычета НДФЛ</small></div>
-  <div class="stat-tile"><span>Рабочих дней</span><b id="statWorkDays">—</b><small>Сохранено</small></div>
-  <div class="stat-tile"><span>Заказов ЗН</span><b id="statOrders">—</b><small>Всего</small></div>
-  <div class="stat-tile"><span>Переработка</span><b id="statOvertime">—</b><small>Часов</small></div>
+  <div class="stat-tile stat-highlight"><span class="metric-label"><svg class="inline-icon"><use href="#i-wallet"/></svg>Начислено</span><b id="statTotal">—</b><small id="statsPeriodLabel">За месяц</small></div>
+  <div class="stat-tile"><span class="metric-label"><svg class="inline-icon"><use href="#i-coins"/></svg>НДФЛ</span><b id="statTax">—</b><small>Ставка из Google Таблицы</small></div>
+  <div class="stat-tile stat-highlight"><span class="metric-label"><svg class="inline-icon"><use href="#i-wallet"/></svg>К выплате</span><b id="statNet">—</b><small>После вычета НДФЛ</small></div>
+  <div class="stat-tile"><span class="metric-label"><svg class="inline-icon"><use href="#i-calendar"/></svg>Рабочих дней</span><b id="statWorkDays">—</b><small>Сохранено</small></div>
+  <div class="stat-tile"><span class="metric-label"><svg class="inline-icon"><use href="#i-package"/></svg>Заказов ЗН</span><b id="statOrders">—</b><small>Всего</small></div>
+  <div class="stat-tile"><span class="metric-label"><svg class="inline-icon"><use href="#i-timer"/></svg>Переработка</span><b id="statOvertime">—</b><small>Часов</small></div>
 </div>
 <div class="stats-subhead">Заработок по дням</div>
 <div id="statsChart" class="stats-chart"><p class="message">Загружаем статистику…</p></div>
@@ -85,7 +85,7 @@
  <div class="order-analytics-grid">
   <div class="analytics-tile"><span>Заказов ЗН</span><b id="analyticsOrders">0</b></div>
   <div class="analytics-tile"><span>Общий вес</span><b id="analyticsWeight">0 кг</b></div>
-  <div class="analytics-tile"><span>Точки</span><b id="analyticsPoints">0</b></div>
+  <div class="analytics-tile"><span class="metric-label"><svg class="inline-icon"><use href="#i-points"/></svg>Точки</span><b id="analyticsPoints">0</b></div>
   <div class="analytics-tile"><span>Средний вес ЗН</span><b id="analyticsAverage">0 кг</b></div>
   <div class="analytics-tile"><span>Невывозы</span><b id="analyticsMissed">0</b></div>
   <div class="analytics-tile"><span>Переработка</span><b id="analyticsOvertime">0 ч</b></div>
@@ -109,7 +109,7 @@
 <section class="card">
 <div class="section-head"><h2><svg class="heading-icon "><use href="#i-package"/></svg>Заказ-наряды</h2><button id="addOrder" class="small-btn">+ Добавить</button></div>
 <div id="orders"></div>
-<div class="totals"><div><span>Оплачиваемый вес</span><b id="weightTotal">0 кг</b></div><div><span>Точки</span><b id="pointsTotal">0</b></div><div><span>Оплата за вес</span><b id="weightPay">0 ₽</b></div><div><span>Оплата за точки</span><b id="pointsPay">0 ₽</b></div></div>
+<div class="totals"><div><span class="metric-label"><svg class="inline-icon"><use href="#i-weight"/></svg>Оплачиваемый вес</span><b id="weightTotal">0 кг</b></div><div><span>Точки</span><b id="pointsTotal">0</b></div><div><span class="metric-label"><svg class="inline-icon"><use href="#i-coins"/></svg>Оплата за вес</span><b id="weightPay">0 ₽</b></div><div><span class="metric-label"><svg class="inline-icon"><use href="#i-coins"/></svg>Оплата за точки</span><b id="pointsPay">0 ₽</b></div></div>
 </section>
 <section class="card">
 <div class="section-head"><h2><svg class="heading-icon danger"><use href="#i-alert"/></svg>Невывозы за день</h2><button id="addMissed" class="small-btn">+ Добавить</button></div>
@@ -185,5 +185,5 @@
 </nav>
 <section id="printReport" aria-hidden="true></section>
 <footer>Локальное хранение · Google Sheets при подключении интернета</footer>
-<script src="config.js?v=15"></script><script src="app.js?v=18"></script>
+<script src="config.js?v=15"></script><script src="app.js?v=19"></script>
 </body></html>
