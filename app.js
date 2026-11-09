@@ -96,30 +96,42 @@ function emptyMissed(){
 }
 
 function renderRows(){
- $('orders').innerHTML=orders.map((o,i)=>`
-  <div class="order-row" data-i="${i}">
-   <label>
-    <span class="row-label">№ ЗН</span>
-    <input data-kind="order" data-field="zn" data-i="${i}" value="${esc(o.zn)}" placeholder="Номер">
-   </label>
-   <label>
-    <span class="row-label">Вес, т</span>
-    <input data-kind="order" data-field="weight" data-i="${i}" type="number" step="0.001" value="${esc(o.weight)}" placeholder="0">
-   </label>
-   <label>
-    <span class="row-label">Точки</span>
-    <input data-kind="order" data-field="points" data-i="${i}" type="number" step="1" value="${esc(o.points)}" placeholder="0">
-   </label>
-   <label>
-    <span class="row-label">Тип</span>
-    <select data-kind="order" data-field="type" data-i="${i}">
-     <option ${o.type==='Обычная'?'selected':''}>Обычная</option>
-     <option ${o.type==='ТЭК'?'selected':''}>ТЭК</option>
-    </select>
-   </label>
-   <button class="remove" data-remove="order" data-i="${i}" aria-label="Удалить">×</button>
-  </div>
- `).join('');
+ $('orders').innerHTML=orders.map((o,i)=>{
+  const coefficient=o.type==='ТЭК'?rates.tek:1;
+  const orderWeight=(Number(o.weight)||0)*1000*coefficient;
+  const orderPoints=(Number(o.points)||0)*coefficient;
+  const orderTotal=orderWeight*rates.kg+orderPoints*rates.point;
+  return `
+   <article class="order-card" data-i="${i}">
+    <div class="order-card-head">
+     <span class="order-index">${String(i+1).padStart(2,'0')}</span>
+     <label class="order-number-field">
+      <span class="row-label">Номер заказа-наряда</span>
+      <input data-kind="order" data-field="zn" data-i="${i}" value="${esc(o.zn)}" placeholder="Например, ЗН-458732">
+     </label>
+     <button class="remove order-remove" data-remove="order" data-i="${i}" aria-label="Удалить заказ">×</button>
+    </div>
+    <div class="order-fields">
+     <label>
+      <span class="row-label">Вес, т</span>
+      <input data-kind="order" data-field="weight" data-i="${i}" type="number" min="0" step="0.001" value="${esc(o.weight)}" placeholder="0,000">
+     </label>
+     <label>
+      <span class="row-label">Количество точек</span>
+      <input data-kind="order" data-field="points" data-i="${i}" type="number" min="0" step="1" value="${esc(o.points)}" placeholder="0">
+     </label>
+     <label class="order-type-field">
+      <span class="row-label">Тип заказа</span>
+      <select data-kind="order" data-field="type" data-i="${i}">
+       <option ${o.type==='Обычная'?'selected':''}>Обычная</option>
+       <option ${o.type==='ТЭК'?'selected':''}>ТЭК</option>
+      </select>
+     </label>
+    </div>
+    <div class="order-card-total"><span>Начисление по заказу</span><b>${rub(orderTotal)}</b></div>
+   </article>
+  `;
+ }).join('');
 
  $('missed').innerHTML=missed.map((m,i)=>`
   <div class="missed-row">
@@ -141,7 +153,6 @@ function renderRows(){
   </div>
  `).join('');
 }
-
 function esc(v){
  return String(v??'').replace(/[&<>"']/g,c=>({
   '&':'&amp;',
@@ -1053,7 +1064,7 @@ window.addEventListener('offline',()=>{
   await openDB();
 
   if('serviceWorker'in navigator){
-   navigator.serviceWorker.register('./sw.js?v=13',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
+   navigator.serviceWorker.register('./sw.js?v=14',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
   }
 
   $('net').textContent=navigator.onLine?'Интернет есть':'Без интернета';
