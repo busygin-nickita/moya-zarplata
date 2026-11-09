@@ -1,7 +1,7 @@
 (() => {
 const $=id=>document.getElementById(id), dbName='MoyaZarplataDB', store='days';
 let db, orders=[], missed=[], currentMonth='';
-const rates={salary:43400,kg:0.87,point:22.20,tek:0.5,overtime:500};
+const rates={salary:43400,kg:0.87,point:22.20,tek:0.5,overtime:500,taxRate:0.13};
 const rub=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n)+' ₽';
 const today=new Date(), pad=n=>String(n).padStart(2,'0');
 const monthNow=`${today.getFullYear()}-${pad(today.getMonth()+1)}`;
@@ -225,6 +225,7 @@ async function renderMonth(){
  });
 
  $('monthTotal').textContent=rub(total);
+ $('monthNet').textContent=rub(total*(1-rates.taxRate));
  $('pendingCount').textContent=pending+' ожидают';
 
  $('syncLabel').textContent=pending
@@ -398,6 +399,17 @@ async function api(action,payload={}){
  if(!result.ok)throw new Error(result.error||'Ошибка API');
 
  return result;
+}
+
+async function loadRatesFromSheet(){
+ if(!navigator.onLine||!localStorage.getItem('MZ_API_TOKEN'))return false;
+ const result=await api('getSettings');
+ const incoming=result.settings||{};
+ ['salary','kg','point','tek','overtime','taxRate'].forEach(key=>{
+  const value=Number(incoming[key]);
+  if(Number.isFinite(value)&&value>=0)rates[key]=value;
+ });
+ return true;
 }
 
 // Загружает дни выбранного месяца из Google Таблиц в локальную базу.
@@ -584,8 +596,12 @@ async function renderStats(){
  const monthsWithRecords=new Set(selectedDays.map(d=>monthKeyFromDate(d.date)));
  const salary=period==='year'?rates.salary*monthsWithRecords.size:(selectedDays.length?rates.salary:0);
  const total=salary+variable;
+ const tax=Math.round(total*rates.taxRate*100)/100;
+ const net=total-tax;
 
  $('statTotal').textContent=rub(total);
+ $('statTax').textContent=rub(tax);
+ $('statNet').textContent=rub(net);
  $('statWorkDays').textContent=String(workDays.length);
  $('statOrders').textContent=String(ordersCount);
  $('statOvertime').textContent=(Math.round(overtimeHours*10)/10).toLocaleString('ru-RU')+' ч';
@@ -967,6 +983,12 @@ window.addEventListener('offline',()=>{
 
   $('net').textContent=navigator.onLine?'Интернет есть':'Без интернета';
   $('net').className=navigator.onLine?'pill green':'pill';
+
+  try{
+   await loadRatesFromSheet();
+  }catch(settingsError){
+   $('message').textContent='Не удалось загрузить ставки из Google Таблицы. Используются значения по умолчанию: '+settingsError.message;
+  }
 
   await loadDay(localDateString());
   $('calendarMonth').value=monthNow;
