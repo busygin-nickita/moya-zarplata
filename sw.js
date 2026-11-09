@@ -1,4 +1,4 @@
-const CACHE = 'salary-pwa-v10-net-pay';
+const CACHE = 'salary-pwa-v11-config-refresh';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install', event => {
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
@@ -9,7 +9,7 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
  const req=event.request, url=new URL(req.url);
  if(url.origin!==location.origin||req.method!=='GET')return;
- const shell=['/','/index.html','/styles.css','/app.js'].some(p=>url.pathname.endsWith(p));
+ const shell=['/','/index.html','/styles.css','/app.js','/config.js'].some(p=>url.pathname.endsWith(p));
  if(shell){
   event.respondWith(fetch(req,{cache:'no-store'}).then(res=>{const copy=res.clone();caches.open(CACHE).then(c=>c.put(req,copy));return res;}).catch(()=>caches.match(req).then(c=>c||caches.match('./index.html'))));
  }else{
