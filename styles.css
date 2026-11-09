@@ -251,10 +251,15 @@ body{padding-bottom:92px}
 .analytics-tile b{font-size:20px;color:#f6f6f6;overflow-wrap:anywhere}
 .analytics-note{margin-top:12px;color:#8e959e;font-size:10px;line-height:1.5}
 #historySection{scroll-margin-top:16px}
-.bottom-nav{position:fixed;z-index:50;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:8px;border:1px solid rgba(255,255,255,.12);border-radius:19px;background:rgba(20,22,25,.94);backdrop-filter:blur(18px);box-shadow:0 8px 30px rgba(0,0,0,.45)}
+.bottom-nav{position:fixed;z-index:50;left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(5,1fr);gap:4px;padding:8px;border:1px solid rgba(255,255,255,.12);border-radius:19px;background:rgba(20,22,25,.94);backdrop-filter:blur(18px);box-shadow:0 8px 30px rgba(0,0,0,.45)}
 .nav-item{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:52px;border:0;border-radius:12px;background:transparent;color:#9298a1}
 .nav-item span{font-size:20px;line-height:1}
 .nav-item small{font-size:9px;font-weight:700}
 .nav-item.active{background:rgba(242,139,46,.13);color:#ff9b36}
 @media(min-width:700px){.bottom-nav{left:50%;right:auto;width:420px;transform:translateX(-50%)}}
 @media(max-width:380px){.calendar-switch input{width:118px}.calendar-weekdays,.earnings-calendar{gap:4px}.calendar-day{border-radius:8px}.analytics-tile{padding:11px}}
+.settings-section .settings-group{padding:14px 0;border-top:1px solid #30343a}
+.settings-section .settings-group:first-of-type{border-top:0;padding-top:0}
+.settings-section .settings-group h3{margin:0 0 10px;font-size:15px;color:#f3f3f3}
+.settings-section .form-grid{margin-top:12px}
+.settings-section .actions{margin-top:10px}
