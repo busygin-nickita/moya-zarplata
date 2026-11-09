@@ -276,7 +276,7 @@ async function renderCalendar(monthKey=$('calendarMonth').value){
   const amount=record&&record.status!=='Выходной'?calc(record).total:0;
   if(record&&record.status!=='Выходной'){total+=amount;workDays++;}
   const level=amount<=0?0:Math.min(4,Math.max(1,Math.ceil(amount/max*4)));
-  const selected=$('date').value===date?' selected':'';
+  const selected=$('calendarSelectedDate').value===date?' selected':'';
   const label=record?rub(amount):'Нет записи';
   cells.push(`<button type="button" class="calendar-day level-${level}${selected}" data-calendar-date="${date}" aria-label="${date}: ${esc(label)}"><span>${day}</span>${record&&amount>0?`<small>${Math.round(amount/100)/10}к</small>`:''}</button>`);
  }
@@ -785,6 +785,7 @@ document.addEventListener('click',async e=>{
   const shift=el.id==='calendarPrev'?-1:1;
   const next=new Date(y,m-1+shift,1);
   input.value=next.getFullYear()+'-'+String(next.getMonth()+1).padStart(2,'0');
+  $('calendarSelectedDate').value='';
   await renderCalendar(input.value);
   $('calendarDayDetail').textContent='Выбери дату, чтобы посмотреть подробности.';
  }
@@ -792,8 +793,8 @@ document.addEventListener('click',async e=>{
   const date=el.dataset.calendarDate;
   const record=await get(date);
   const detail=$('calendarDayDetail');
+  $('calendarSelectedDate').value=date;
   if(record){
-   $('calendarSelectedDate').value=date;
    showCalendarDetail(record);
   }else{
    detail.innerHTML=`<div class="detail-head"><b>${new Date(date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}</b><span>Записи нет</span></div><button type="button" class="secondary detail-open" data-new-date="${date}">Добавить рабочий день</button>`;
@@ -902,6 +903,7 @@ document.addEventListener('click',async e=>{
 $('date').addEventListener('change',async e=>{
  await loadDay(e.target.value);
  $('calendarMonth').value=e.target.value.slice(0,7);
+ $('calendarSelectedDate').value=e.target.value;
  await renderCalendar($('calendarMonth').value);
 });
 
