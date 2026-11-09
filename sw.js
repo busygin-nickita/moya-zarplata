@@ -1,4 +1,4 @@
-const CACHE = 'salary-pwa-v13-api-fallback';
+const CACHE = 'salary-pwa-v14-api-fallback';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install', event => {
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
