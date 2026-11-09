@@ -432,13 +432,14 @@ async function pullMonth(month,quiet=false){
 
  try{
   const result=await api('getMonthDays',{month});
+  const cloudDays=result.days||[];
 
   const localDays=(await all()).filter(d=>d.month===month);
   const localByDate=new Map(localDays.map(d=>[d.date,d]));
 
   let loaded=0;
 
-  for(const cloudDay of (result.days||[])){
+  for(const cloudDay of cloudDays){
    const local=localByDate.get(cloudDay.date);
 
    // Несинхронизированные изменения на iPhone не затираем облачной копией.
@@ -472,14 +473,14 @@ async function pullMonth(month,quiet=false){
     :'Облачная история проверена — новых дней нет';
   }
 
-  return {loaded};
+  return {loaded,found:cloudDays.length};
 
  }catch(e){
   if(!quiet){
    $('message').textContent='Не удалось загрузить историю из Google Таблиц: '+e.message;
   }
 
-  return {loaded:0,error:e};
+  return {loaded:0,found:0,error:e};
  }
 }
 
@@ -499,19 +500,36 @@ async function restoreAll(){
    .map(x=>x.month)
    .filter(Boolean);
 
+  if(!months.length){
+   $('message').textContent='В Google Таблицах пока нет сохранённых месяцев.';
+   return;
+  }
+
   let loaded=0;
+  let found=0;
+  const errors=[];
 
   for(const month of months){
    const result=await pullMonth(month,true);
+   if(result.error){
+    errors.push(month+': '+result.error.message);
+    continue;
+   }
    loaded+=result.loaded||0;
+   found+=result.found||0;
+  }
+
+  if(errors.length){
+   $('message').textContent='История восстановлена не полностью. Успешно проверено месяцев: '+
+    (months.length-errors.length)+' из '+months.length+'. Ошибки: '+errors.join('; ');
+   return;
   }
 
   const selectedDate=$('date').value||localDateString();
-
   await loadDay(selectedDate);
 
   $('message').textContent=
-   `Восстановление завершено. Обновлено дней: ${loaded}. Месяцев в облаке: ${months.length}.`;
+   `Проверка завершена. Дней найдено в Google: ${found}; добавлено на устройство: ${loaded}; месяцев: ${months.length}.`;
   await renderStats();
 
  }catch(e){
