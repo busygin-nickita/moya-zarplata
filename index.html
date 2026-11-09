@@ -111,16 +111,40 @@
 <div class="actions"><button id="saveBtn" class="primary">Сохранить день</button><button id="syncBtn" class="secondary">Синхронизировать</button></div>
 <p id="message" class="message">Изменения сохраняются на этом iPhone.</p>
 </section>
-<section class="card">
-<div class="section-head"><h2>Подключение Google Sheets</h2><span class="pill">Настройка</span></div>
-<label>Секретный токен для этого устройства<input id="apiToken" type="password" autocomplete="off" placeholder="Вставь свой API_TOKEN"></label>
-<div class="actions" style="margin-top:10px"><button id="tokenSave" class="secondary">Сохранить токен</button><button id="tokenClear" class="secondary">Удалить токен</button></div>
-<p class="message">Токен хранится локально на этом iPhone и не включается в публичные файлы сайта.</p>
-</section>
+
 <section class="card">
 <div class="section-head"><h2>Отчёт за месяц</h2><span class="pill">A4 / PDF</span></div>
 <p class="message">Сформируй месячную ведомость для печати или сохранения в PDF.</p>
 <button id="printBtn" class="primary" style="width:100%;margin-top:10px">Сформировать отчёт и печать</button>
+</section>
+<section class="card settings-section" id="settingsSection">
+ <div class="section-head"><h2>Настройки</h2><span class="pill">Параметры приложения</span></div>
+ <div class="settings-group">
+  <h3>Расчёт зарплаты</h3>
+  <p class="message">Значения загружаются из Google Таблицы. Изменения сохраняются обратно в неё.</p>
+  <div class="form-grid">
+   <label>Оклад за месяц, ₽<input id="settingSalary" type="number" min="0" step="1"></label>
+   <label>Ставка за 1 кг, ₽<input id="settingKg" type="number" min="0" step="0.01"></label>
+   <label>Ставка за точку, ₽<input id="settingPoint" type="number" min="0" step="0.01"></label>
+   <label>Коэффициент ТЭК, %<input id="settingTek" type="number" min="0" max="100" step="1"></label>
+   <label>Переработка за час, ₽<input id="settingOvertime" type="number" min="0" step="1"></label>
+   <label>НДФЛ, %<input id="settingTax" type="number" min="0" max="100" step="0.01"></label>
+  </div>
+  <button id="saveRatesBtn" class="primary" style="width:100%;margin-top:12px">Сохранить параметры</button>
+  <p id="settingsMessage" class="message">Для изменения параметров требуется подключение Google Sheets.</p>
+ </div>
+ <div class="settings-group">
+  <h3>Google Sheets</h3>
+  <label>Секретный токен для этого устройства<input id="apiToken" type="password" autocomplete="off" placeholder="Вставь свой API_TOKEN"></label>
+  <div class="actions" style="margin-top:10px"><button id="tokenSave" class="secondary">Сохранить токен</button><button id="tokenClear" class="secondary">Удалить токен</button></div>
+  <p class="message">Токен хранится локально на этом iPhone и не включается в публичные файлы сайта.</p>
+  <div class="actions"><button id="settingsSyncBtn" class="secondary">Синхронизировать</button><button id="settingsRestoreBtn" class="secondary">Восстановить историю</button></div>
+ </div>
+ <div class="settings-group">
+  <h3>Данные приложения</h3>
+  <button id="exportStatsSettingsBtn" class="secondary" style="width:100%">Экспорт статистики CSV</button>
+  <p class="message">Резервное копирование и восстановление файлов добавим отдельно, чтобы не затронуть текущие данные.</p>
+ </div>
 </section>
 <section class="card" id="historySection">
 <div class="section-head"><h2>История рабочих дней</h2><span id="pendingCount" class="pill">0 ожидают</span></div>
@@ -133,8 +157,9 @@
  <button type="button" class="nav-item" data-nav="calendarSection"><span>▦</span><small>Календарь</small></button>
  <button type="button" class="nav-item" data-nav="ordersAnalyticsSection"><span>▥</span><small>Заказы</small></button>
  <button type="button" class="nav-item" data-nav="historySection"><span>◷</span><small>История</small></button>
+ <button type="button" class="nav-item" data-nav="settingsSection"><span>⚙</span><small>Настройки</small></button>
 </nav>
 <section id="printReport" aria-hidden="true></section>
 <footer>Локальное хранение · Google Sheets при подключении интернета</footer>
-<script src="config.js?v=14"></script><script src="app.js?v=14"></script>
+<script src="config.js?v=15"></script><script src="app.js?v=15"></script>
 </body></html>
