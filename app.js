@@ -2,6 +2,8 @@
 const $=id=>document.getElementById(id), dbName='MoyaZarplataDB', store='days';
 let db, orders=[], missed=[], currentMonth='';
 const rates={salary:43400,kg:0.87,point:22.20,tek:0.5,overtime:500,taxRate:0.13};
+// Резервный адрес API на случай, если config.js не загрузился.
+const APP_SCRIPT_API_URL='https://script.google.com/macros/s/AKfycbxrroyVWZ19npF_73tbRfNGKSiwakWNurOvN5Mm1NaKC0pWU31MzydysRLmZ2DgfmVb/exec';
 const rub=n=>new Intl.NumberFormat('ru-RU',{maximumFractionDigits:2}).format(n)+' ₽';
 const today=new Date(), pad=n=>String(n).padStart(2,'0');
 const monthNow=`${today.getFullYear()}-${pad(today.getMonth()+1)}`;
@@ -360,9 +362,10 @@ async function save(){
 
 async function api(action,payload={}){
  const cfg=window.APP_CONFIG||{};
+ const apiUrl=apiUrl||APP_SCRIPT_API_URL;
  const token=localStorage.getItem('MZ_API_TOKEN')||'';
 
- if(!cfg.API_URL||!token){
+ if(!apiUrl||!token){
   throw new Error('Укажите URL Apps Script в config.js и сохраните токен в настройках приложения');
  }
 
@@ -388,7 +391,7 @@ async function api(action,payload={}){
   };
  }
 
- const response=await fetch(cfg.API_URL,{
+ const response=await fetch(apiUrl,{
   method:'POST',
   headers:{'Content-Type':'text/plain;charset=utf-8'},
   body:JSON.stringify({token:token,action,...outgoing})
@@ -404,7 +407,8 @@ async function api(action,payload={}){
 async function loadRatesFromSheet(){
  if(!navigator.onLine)throw new Error('Нет интернета для загрузки настроек.');
  const cfg=window.APP_CONFIG||{};
- if(!cfg.API_URL)throw new Error('Не загружен URL Apps Script из config.js.');
+ const apiUrl=apiUrl||APP_SCRIPT_API_URL;
+ if(!apiUrl)throw new Error('Не загружен URL Apps Script из config.js.');
  if(!localStorage.getItem('MZ_API_TOKEN'))throw new Error('Не сохранён API_TOKEN на этом устройстве.');
  const result=await api('getSettings');
  const incoming=result.settings||{};
@@ -420,8 +424,9 @@ async function pullMonth(month,quiet=false){
  if(!navigator.onLine)return {loaded:0};
 
  const cfg=window.APP_CONFIG||{};
+ const apiUrl=apiUrl||APP_SCRIPT_API_URL;
 
- if(!cfg.API_URL||!localStorage.getItem('MZ_API_TOKEN')){
+ if(!apiUrl||!localStorage.getItem('MZ_API_TOKEN')){
   return {loaded:0};
  }
 
