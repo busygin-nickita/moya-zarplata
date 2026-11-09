@@ -7,11 +7,21 @@
 <title>Моя зарплата</title>
 </head>
 <body>
+<svg class="icon-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+<symbol id="i-home" viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M8 14h3M8 17h3"/></symbol>
+<symbol id="i-package" viewBox="0 0 24 24"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="M3 7v10l9 5 9-5V7M12 12v10"/></symbol>
+<symbol id="i-history" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l4 2M3 4v5h5"/></symbol>
+<symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19 13.5 21 15l-2 3-2-.7a8 8 0 0 1-2 1l-.3 2h-3.4l-.3-2a8 8 0 0 1-2-1L7 18l-2-3 2-1.5a8 8 0 0 1 0-3L5 9l2-3 2 .7a8 8 0 0 1 2-1l.3-2h3.4l.3 2a8 8 0 0 1 2 1L19 6l2 3-2 1.5a8 8 0 0 1 0 3Z"/></symbol>
+<symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V11h4v9M10 20V4h4v16M16 20v-7h4v7M2 20h20"/></symbol>
+<symbol id="i-wallet" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="15" rx="2"/><path d="M3 8h16a2 2 0 0 1 2 2v2h-5a2 2 0 0 0 0 4h5M17 14h.01"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><path d="m12 3 10 18H2L12 3Z"/><path d="M12 9v5M12 17h.01"/></symbol>
+</svg>
 <header class="top"><div><div class="eyebrow">ЛИЧНЫЙ УЧЁТ</div><h1>Моя зарплата</h1></div><span id="net" class="pill">Проверка сети…</span></header>
 <main>
 <section class="hero card" id="homeSection"><div class="eyebrow light">НАЧИСЛЕНО ЗА МЕСЯЦ · ДО НДФЛ</div><div id="monthTotal" class="money">0 ₽</div><div class="hero-net">К выплате после НДФЛ: <b id="monthNet">0 ₽</b></div><div class="hero-bottom"><span id="monthLabel"></span><span id="syncLabel">Только на этом устройстве</span></div></section>
 <section class="card stats-card" id="statistics">
-<div class="section-head"><h2>Статистика</h2><span class="pill">По сохранённым дням</span></div>
+<div class="section-head"><h2><svg class="heading-icon "><use href="#i-chart"/></svg>Статистика</h2><span class="pill">По сохранённым дням</span></div>
 <div class="stats-controls">
   <select id="statsPeriod" aria-label="Период статистики">
     <option value="month">Месяц</option>
@@ -48,7 +58,7 @@
 
 <section class="card feature-card" id="calendarSection">
  <div class="section-head">
-  <h2>Календарь заработка</h2>
+  <h2><svg class="heading-icon "><use href="#i-calendar"/></svg>Календарь заработка</h2>
   <div class="calendar-switch">
    <button type="button" class="icon-btn" id="calendarPrev" aria-label="Предыдущий месяц">‹</button>
    <input id="calendarMonth" type="month" aria-label="Месяц календаря">
@@ -71,7 +81,7 @@
 </section>
 
 <section class="card feature-card" id="ordersAnalyticsSection">
- <div class="section-head"><h2>Аналитика заказов</h2><span class="pill">За выбранный месяц</span></div>
+ <div class="section-head"><h2><svg class="heading-icon "><use href="#i-chart"/></svg>Аналитика заказов</h2><span class="pill">За выбранный месяц</span></div>
  <div class="order-analytics-grid">
   <div class="analytics-tile"><span>Заказов ЗН</span><b id="analyticsOrders">0</b></div>
   <div class="analytics-tile"><span>Общий вес</span><b id="analyticsWeight">0 кг</b></div>
@@ -86,7 +96,7 @@
 </section>
 
 <section class="card" id="workDaySection">
-<div class="section-head"><h2>Рабочий день</h2><button id="todayBtn" class="text-btn">Сегодня</button></div>
+<div class="section-head"><h2><svg class="heading-icon "><use href="#i-calendar"/></svg>Рабочий день</h2><button id="todayBtn" class="text-btn">Сегодня</button></div>
 <div class="form-grid">
 <label>Месяц<input id="month" type="month"></label>
 <label>Дата<input id="date" type="date"></label>
@@ -97,17 +107,17 @@
 </div>
 </section>
 <section class="card">
-<div class="section-head"><h2>Заказ-наряды</h2><button id="addOrder" class="small-btn">+ Добавить</button></div>
+<div class="section-head"><h2><svg class="heading-icon "><use href="#i-package"/></svg>Заказ-наряды</h2><button id="addOrder" class="small-btn">+ Добавить</button></div>
 <div id="orders"></div>
 <div class="totals"><div><span>Оплачиваемый вес</span><b id="weightTotal">0 кг</b></div><div><span>Точки</span><b id="pointsTotal">0</b></div><div><span>Оплата за вес</span><b id="weightPay">0 ₽</b></div><div><span>Оплата за точки</span><b id="pointsPay">0 ₽</b></div></div>
 </section>
 <section class="card">
-<div class="section-head"><h2>Невывозы за день</h2><button id="addMissed" class="small-btn">+ Добавить</button></div>
+<div class="section-head"><h2><svg class="heading-icon danger"><use href="#i-alert"/></svg>Невывозы за день</h2><button id="addMissed" class="small-btn">+ Добавить</button></div>
 <div id="missed"></div>
  <button type="button" class="text-btn" id="openMissedJournal">Открыть общий журнал невывозов →</button>
 </section>
 <section class="card feature-card" id="missedJournalSection">
- <div class="section-head"><h2>Журнал невывезенных заявок</h2><span class="pill" id="missedJournalCount">0</span></div>
+ <div class="section-head"><h2><svg class="heading-icon danger"><use href="#i-alert"/></svg>Журнал невывезенных заявок</h2><span class="pill" id="missedJournalCount">0</span></div>
  <div class="missed-journal-summary"><b id="missedJournalTotal">Всего: 0</b><span>Только заявки с невывозом</span></div>
  <div class="missed-journal-filters">
   <input id="missedJournalSearch" type="search" placeholder="Поиск: номер, причина, водитель" aria-label="Поиск по журналу невывозов">
@@ -120,19 +130,19 @@
  <div id="missedJournalList" class="missed-journal-list"><p class="message">Загружаем журнал…</p></div>
 </section>
 <section class="card">
-<div class="section-head"><h2>Итог дня</h2><span class="pill green">Расчёт локально</span></div>
+<div class="section-head"><h2><svg class="heading-icon "><use href="#i-wallet"/></svg>Итог дня</h2><span class="pill green">Расчёт локально</span></div>
 <div class="day-total" id="dayTotal">0 ₽</div>
 <div class="actions"><button id="saveBtn" class="primary">Сохранить день</button><button id="syncBtn" class="secondary">Синхронизировать</button></div>
 <p id="message" class="message">Изменения сохраняются на этом iPhone.</p>
 </section>
 
 <section class="card">
-<div class="section-head"><h2>Отчёт за месяц</h2><span class="pill">A4 / PDF</span></div>
+<div class="section-head"><h2><svg class="heading-icon "><use href="#i-chart"/></svg>Отчёт за месяц</h2><span class="pill">A4 / PDF</span></div>
 <p class="message">Сформируй месячную ведомость для печати или сохранения в PDF.</p>
 <button id="printBtn" class="primary" style="width:100%;margin-top:10px">Сформировать отчёт и печать</button>
 </section>
 <section class="card settings-section" id="settingsSection">
- <div class="section-head"><h2>Настройки</h2><span class="pill">Параметры приложения</span></div>
+ <div class="section-head"><h2><svg class="heading-icon "><use href="#i-settings"/></svg>Настройки</h2><span class="pill">Параметры приложения</span></div>
  <div class="settings-group">
   <h3>Расчёт зарплаты</h3>
   <p class="message">Значения загружаются из Google Таблицы. Изменения сохраняются обратно в неё.</p>
@@ -161,19 +171,19 @@
  </div>
 </section>
 <section class="card" id="historySection">
-<div class="section-head"><h2>История рабочих дней</h2><span id="pendingCount" class="pill">0 ожидают</span></div>
+<div class="section-head"><h2><svg class="heading-icon "><use href="#i-history"/></svg>История рабочих дней</h2><span id="pendingCount" class="pill">0 ожидают</span></div>
 <div id="daysList" class="days-list"></div>
 </section>
 
 </main>
 <nav class="bottom-nav" aria-label="Основная навигация">
- <button type="button" class="nav-item active" data-nav="homeSection"><span>⌂</span><small>Главная</small></button>
- <button type="button" class="nav-item" data-nav="calendarSection"><span>▦</span><small>Календарь</small></button>
- <button type="button" class="nav-item" data-nav="ordersAnalyticsSection"><span>▥</span><small>Заказы</small></button>
- <button type="button" class="nav-item" data-nav="historySection"><span>◷</span><small>История</small></button>
- <button type="button" class="nav-item" data-nav="settingsSection"><span>⚙</span><small>Настройки</small></button>
+ <button type="button" class="nav-item active" data-nav="homeSection"><span class="nav-icon"><svg><use href="#i-home"/></svg></span><small>Главная</small></button>
+ <button type="button" class="nav-item" data-nav="calendarSection"><span class="nav-icon"><svg><use href="#i-calendar"/></svg></span><small>Календарь</small></button>
+ <button type="button" class="nav-item" data-nav="ordersAnalyticsSection"><span class="nav-icon"><svg><use href="#i-package"/></svg></span><small>Заказы</small></button>
+ <button type="button" class="nav-item" data-nav="historySection"><span class="nav-icon"><svg><use href="#i-history"/></svg></span><small>История</small></button>
+ <button type="button" class="nav-item" data-nav="settingsSection"><span class="nav-icon"><svg><use href="#i-settings"/></svg></span><small>Настройки</small></button>
 </nav>
 <section id="printReport" aria-hidden="true></section>
 <footer>Локальное хранение · Google Sheets при подключении интернета</footer>
-<script src="config.js?v=15"></script><script src="app.js?v=17"></script>
+<script src="config.js?v=15"></script><script src="app.js?v=18"></script>
 </body></html>
