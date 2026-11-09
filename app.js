@@ -210,6 +210,16 @@ function formData(){
 
 function renderCalc(){
  const d=formData(),c=calc(d);
+ document.querySelectorAll('.order-card').forEach(card=>{
+  const i=Number(card.dataset.i),o=orders[i];
+  if(!o)return;
+  const coefficient=o.type==='ТЭК'?rates.tek:1;
+  const weight=(Number(o.weight)||0)*1000*coefficient;
+  const points=(Number(o.points)||0)*coefficient;
+  const total=weight*rates.kg+points*rates.point;
+  const value=card.querySelector('.order-card-total b');
+  if(value)value.textContent=rub(total);
+ });
 
  $('weightTotal').textContent=(Math.round(c.weight*100)/100).toLocaleString('ru-RU')+' кг';
  $('pointsTotal').textContent=(Math.round(c.points*100)/100).toLocaleString('ru-RU');
