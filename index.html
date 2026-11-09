@@ -22,7 +22,7 @@
 <symbol id="i-coins" viewBox="0 0 24 24"><ellipse cx="9" cy="5" rx="6" ry="3"/><path d="M3 5v4c0 1.7 2.7 3 6 3s6-1.3 6-3V5M3 9v4c0 1.7 2.7 3 6 3 1.1 0 2.1-.2 3-.5M15 12c3.3 0 6 1.3 6 3s-2.7 3-6 3-6-1.3-6-3 2.7-3 6-3Z"/></symbol>
 <symbol id="i-points" viewBox="0 0 24 24"><path d="M12 22s8-7 8-13a8 8 0 1 0-16 0c0 6 8 13 8 13Z"/><circle cx="12" cy="9" r="2.5"/></symbol>
 <symbol id="i-message" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H4l1.8-4A8.5 8.5 0 1 1 21 11.5Z"/><path d="M8 11h8M8 15h5"/></symbol>
-<symbol id="i-tag" viewBox="0 0 24 24"><path d="M20 13 11 22l-9-9V2h11l7 7a3 3 0 0 1 0 4Z"/><circle cx="7" cy="7" r="1"/></symbol></svg>
+<symbol id="i-tag" viewBox="0 0 24 24"><path d="M20 13 11 22l-9-9V2h11l7 7a3 3 0 0 1 0 4Z"/><circle cx="7" cy="7" r="1"/></symbol><symbol id="i-scan" viewBox="0 0 24 24"><path d="M4 7V4h3M17 4h3v3M20 17v3h-3M7 20H4v-3M3 12h18M7 9v6M11 9v6M15 9v6"/></symbol></svg>
 <header class="top"><div><div class="eyebrow">ЛИЧНЫЙ УЧЁТ</div><h1>Моя зарплата</h1></div><span id="net" class="pill">Проверка сети…</span></header>
 <main>
 <section class="hero card" id="homeSection"><div class="eyebrow light">НАЧИСЛЕНО ЗА МЕСЯЦ · ДО НДФЛ</div><div id="monthTotal" class="money">0 ₽</div><div class="hero-net">К выплате после НДФЛ: <b id="monthNet">0 ₽</b></div><div class="hero-bottom"><span id="monthLabel"></span><span id="syncLabel">Только на этом устройстве</span></div></section>
@@ -113,7 +113,13 @@
 </div>
 </section>
 <section class="card">
-<div class="section-head"><h2><svg class="heading-icon "><use href="#i-package"/></svg>Заказ-наряды</h2><button id="addOrder" class="small-btn">+ Добавить</button></div>
+<div class="section-head order-section-head"><h2><svg class="heading-icon "><use href="#i-package"/></svg>Заказ-наряды</h2><div class="order-head-actions"><button id="scanNewOrder" class="small-btn scan-btn"><svg class="button-icon"><use href="#i-scan"/></svg>Сканер ЗН</button><button id="addOrder" class="small-btn">+ Добавить</button></div></div>
+<div id="scannerPanel" class="scanner-panel" hidden>
+ <div class="scanner-panel-head"><div><b><svg class="button-icon"><use href="#i-scan"/></svg>Сканирование заказа</b><p id="scannerMessage">Разреши доступ к камере и наведи её на штрихкод или QR-код.</p></div><button type="button" id="closeScanner" class="remove" aria-label="Закрыть сканер">×</button></div>
+ <div class="scanner-video-wrap"><video id="scannerVideo" playsinline muted></video><div class="scanner-target"></div></div>
+ <div class="scanner-actions"><button type="button" id="stopScanner" class="secondary">Остановить камеру</button></div>
+ <p class="scanner-hint">Если код не считывается, можно ввести номер ЗН вручную в поле заказа.</p>
+</div>
 <div id="orders"></div>
 <div class="totals"><div><span class="metric-label"><svg class="inline-icon"><use href="#i-weight"/></svg>Оплачиваемый вес</span><b id="weightTotal">0 кг</b></div><div><span>Точки</span><b id="pointsTotal">0</b></div><div><span class="metric-label"><svg class="inline-icon"><use href="#i-coins"/></svg>Оплата за вес</span><b id="weightPay">0 ₽</b></div><div><span class="metric-label"><svg class="inline-icon"><use href="#i-coins"/></svg>Оплата за точки</span><b id="pointsPay">0 ₽</b></div></div>
 </section>
@@ -191,5 +197,5 @@
 </nav>
 <section id="printReport" aria-hidden="true></section>
 <footer>Локальное хранение · Google Sheets при подключении интернета</footer>
-<script src="config.js?v=15"></script><script src="app.js?v=19"></script>
+<script src="config.js?v=15"></script><script src="https://cdn.jsdelivr.net/npm/@zxing/browser@0.1.5/umd/index.min.js" defer></script><script src="app.js?v=20"></script>
 </body></html>
