@@ -324,3 +324,11 @@ body{padding-bottom:92px}
 .missed-journal-item p{margin:0;color:#c4c8ce;font-size:12px;line-height:1.45;overflow-wrap:anywhere}
 .missed-journal-open{min-height:38px;padding:9px;font-size:11px}
 @media(max-width:380px){.missed-journal-filters{grid-template-columns:1fr}.missed-journal-filters>*{grid-column:1/-1}}
+
+/* Consistent inline SVG icon system */
+.icon-sprite{position:absolute;width:0;height:0;overflow:hidden}
+.nav-item .nav-icon{display:grid;place-items:center;width:28px;height:28px;margin:0 auto 3px}
+.nav-item .nav-icon svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.section-head h2{display:flex;align-items:center;gap:9px}
+.heading-icon{width:22px;height:22px;flex:0 0 22px;fill:none;stroke:#ff981f;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.heading-icon.danger{stroke:#ff6258}
