@@ -102,8 +102,22 @@
 <div class="totals"><div><span>Оплачиваемый вес</span><b id="weightTotal">0 кг</b></div><div><span>Точки</span><b id="pointsTotal">0</b></div><div><span>Оплата за вес</span><b id="weightPay">0 ₽</b></div><div><span>Оплата за точки</span><b id="pointsPay">0 ₽</b></div></div>
 </section>
 <section class="card">
-<div class="section-head"><h2>Невывыезженные заявки</h2><button id="addMissed" class="small-btn">+ Добавить</button></div>
+<div class="section-head"><h2>Невывозы за день</h2><button id="addMissed" class="small-btn">+ Добавить</button></div>
 <div id="missed"></div>
+ <button type="button" class="text-btn" id="openMissedJournal">Открыть общий журнал невывозов →</button>
+</section>
+<section class="card feature-card" id="missedJournalSection">
+ <div class="section-head"><h2>Журнал невывезенных заявок</h2><span class="pill" id="missedJournalCount">0</span></div>
+ <div class="missed-journal-summary"><b id="missedJournalTotal">Всего: 0</b><span>Только заявки с невывозом</span></div>
+ <div class="missed-journal-filters">
+  <input id="missedJournalSearch" type="search" placeholder="Поиск: номер, причина, водитель" aria-label="Поиск по журналу невывозов">
+  <select id="missedJournalCategory" aria-label="Фильтр по причине">
+   <option value="">Все причины</option>
+   <option>Возврат</option><option>Не едет</option><option>Не хватает</option><option>Отмена</option>
+  </select>
+  <input id="missedJournalMonth" type="month" aria-label="Фильтр по месяцу">
+ </div>
+ <div id="missedJournalList" class="missed-journal-list"><p class="message">Загружаем журнал…</p></div>
 </section>
 <section class="card">
 <div class="section-head"><h2>Итог дня</h2><span class="pill green">Расчёт локально</span></div>
@@ -161,5 +175,5 @@
 </nav>
 <section id="printReport" aria-hidden="true></section>
 <footer>Локальное хранение · Google Sheets при подключении интернета</footer>
-<script src="config.js?v=15"></script><script src="app.js?v=16"></script>
+<script src="config.js?v=15"></script><script src="app.js?v=17"></script>
 </body></html>
