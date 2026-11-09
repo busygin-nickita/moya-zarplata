@@ -9,7 +9,7 @@
 <body>
 <header class="top"><div><div class="eyebrow">ЛИЧНЫЙ УЧЁТ</div><h1>Моя зарплата</h1></div><span id="net" class="pill">Проверка сети…</span></header>
 <main>
-<section class="hero card" id="homeSection"><div class="eyebrow light">НАЧИСЛЕНО ЗА МЕСЯЦ</div><div id="monthTotal" class="money">0 ₽</div><div class="hero-bottom"><span id="monthLabel"></span><span id="syncLabel">Только на этом устройстве</span></div></section>
+<section class="hero card" id="homeSection"><div class="eyebrow light">НАЧИСЛЕНО ЗА МЕСЯЦ · ДО НДФЛ</div><div id="monthTotal" class="money">0 ₽</div><div class="hero-net">К выплате после НДФЛ: <b id="monthNet">0 ₽</b></div><div class="hero-bottom"><span id="monthLabel"></span><span id="syncLabel">Только на этом устройстве</span></div></section>
 <section class="card stats-card" id="statistics">
 <div class="section-head"><h2>Статистика</h2><span class="pill">По сохранённым дням</span></div>
 <div class="stats-controls">
@@ -22,6 +22,8 @@
 </div>
 <div class="stats-grid">
   <div class="stat-tile stat-highlight"><span>Начислено</span><b id="statTotal">—</b><small id="statsPeriodLabel">За месяц</small></div>
+  <div class="stat-tile"><span>НДФЛ</span><b id="statTax">—</b><small>Ставка из Google Таблицы</small></div>
+  <div class="stat-tile stat-highlight"><span>К выплате</span><b id="statNet">—</b><small>После вычета НДФЛ</small></div>
   <div class="stat-tile"><span>Рабочих дней</span><b id="statWorkDays">—</b><small>Сохранено</small></div>
   <div class="stat-tile"><span>Заказов ЗН</span><b id="statOrders">—</b><small>Всего</small></div>
   <div class="stat-tile"><span>Переработка</span><b id="statOvertime">—</b><small>Часов</small></div>
