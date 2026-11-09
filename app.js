@@ -304,12 +304,18 @@ function showCalendarDetail(day){
 async function renderOrderAnalytics(monthKey=$('month').value){
  const days=(await all()).filter(d=>d.month===monthKey);
  let count=0,weight=0,points=0,missed=0,overtime=0;
+ let workDays=0,bestDay=null;
  for(const d of days){
   if(d.status==='Выходной')continue;
+  workDays++;
   const orders=(d.orders||[]).filter(o=>o.zn||Number(o.weight)||Number(o.points));
   count+=orders.length;
-  weight+=calc(d).weight;
-  points+=calc(d).points;
+  if(!bestDay||orders.length>bestDay.count){
+   bestDay={date:d.date,count:orders.length};
+  }
+  const c=calc(d);
+  weight+=c.weight;
+  points+=c.points;
   missed+=(d.undelivered||[]).filter(m=>m.number||m.reason).length;
   overtime+=Number(d.overtime)||0;
  }
@@ -319,8 +325,12 @@ async function renderOrderAnalytics(monthKey=$('month').value){
  $('analyticsAverage').textContent=count?(weight/count).toLocaleString('ru-RU',{maximumFractionDigits:0})+' кг':'0 кг';
  $('analyticsMissed').textContent=String(missed);
  $('analyticsOvertime').textContent=(Math.round(overtime*10)/10).toLocaleString('ru-RU')+' ч';
+ $('analyticsDailyAverage').textContent=workDays?(count/workDays).toLocaleString('ru-RU',{maximumFractionDigits:1}):'0';
+ $('analyticsBestDay').textContent=bestDay&&bestDay.count
+  ?bestDay.count+' · '+new Date(bestDay.date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'short'})
+  :'—';
  $('analyticsNote').textContent=days.length
-  ?`Учтено ${days.length} сохранённых дней за ${new Date(monthKey+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'long',year:'numeric'})}.`
+  ?`Учтено ${days.length} сохранённых дней за ${new Date(monthKey+'-01T12:00:00').toLocaleDateString('ru-RU',{month:'long',year:'numeric'})}. Среднее рассчитано по рабочим дням; лучший день — по количеству заказов ЗН.`
   :'За выбранный месяц пока нет сохранённых дней.';
 }
 
