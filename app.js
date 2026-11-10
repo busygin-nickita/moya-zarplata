@@ -50,6 +50,7 @@ const monthNow=`${today.getFullYear()}-${pad(today.getMonth()+1)}`;
 let earningsHidden=localStorage.getItem('MZ_EARNINGS_HIDDEN')==='1';
 function applyEarningsVisibility(){
  const hidden=earningsHidden;
+ document.body.classList.toggle('earnings-hidden-global',hidden);
  $('monthTotal').classList.toggle('earnings-hidden',hidden);
  $('monthNet').classList.toggle('earnings-hidden',hidden);
  const button=$('toggleEarningsVisibility');
