@@ -262,6 +262,41 @@ function renderRows(){
   </div>
  `).join('');
 }
+async function renderOrdersJournal(){
+ const days=await all();
+ const records=[];
+ days.forEach(day=>(day.orders||[]).forEach((o,index)=>{
+  if(!String(o.zn||'').trim()&&!Number(o.weight)&&!Number(o.points))return;
+  records.push({date:day.date,order:o,index});
+ }));
+ records.sort((a,b)=>b.date.localeCompare(a.date));
+ const query=($('ordersJournalSearch')?.value||'').trim().toLowerCase();
+ const type=$('ordersJournalType')?.value||'';
+ const month=$('ordersJournalMonth')?.value||'';
+ const filtered=records.filter(r=>
+  (!query||String(r.order.zn||'').toLowerCase().includes(query))&&
+  (!type||(r.order.type||'Обычная')===type)&&(!month||r.date.startsWith(month))
+ );
+ $('ordersJournalCount').textContent=String(filtered.length);
+ $('ordersJournalSummary').textContent='Всего: '+records.length+' · Обычная: '+records.filter(r=>(r.order.type||'Обычная')==='Обычная').length+' · ТЭК: '+records.filter(r=>r.order.type==='ТЭК').length;
+ const grouped={};
+ filtered.forEach(r=>(grouped[r.date]??=[]).push(r));
+ $('ordersJournalList').innerHTML=Object.keys(grouped).length?Object.entries(grouped).map(([date,items])=>{
+  const total=items.reduce((sum,r)=>{
+   const coef=r.order.type==='ТЭК'?rates.tek:1;
+   return sum+(Number(r.order.weight)||0)*1000*coef*rates.kg+(Number(r.order.points)||0)*coef*rates.point;
+  },0);
+  return `<div class="orders-journal-day">
+   <div class="orders-journal-dayhead"><b>${new Date(date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}</b><span>${items.length} ЗН · ${rub(total)}</span></div>
+   ${items.map(r=>`<article class="missed-journal-item orders-journal-item">
+    <div class="missed-journal-top"><b>ЗН ${esc(r.order.zn||'Без номера')}</b><span class="order-type-badge ${r.order.type==='ТЭК'?'tek':''}">${esc(r.order.type||'Обычная')}</span></div>
+    <div class="missed-journal-meta"><span>${Number(r.order.weight)||0} т</span><span>${Number(r.order.points)||0} точек</span></div>
+    <div class="orders-journal-foot"><b>${rub((Number(r.order.weight)||0)*1000*(r.order.type==='ТЭК'?rates.tek:1)*rates.kg+(Number(r.order.points)||0)*(r.order.type==='ТЭК'?rates.tek:1)*rates.point)}</b><button type="button" class="secondary orders-journal-open" data-open-order-day="${date}">Открыть день</button></div>
+   </article>`).join('')}
+  </div>`;
+ }).join(''):'<p class="message">Заказ-нарядов по выбранным условиям нет.</p>';
+}
+
 async function renderMissedJournal(){
  const records=[];
  const days=await all();
@@ -414,6 +449,7 @@ async function loadDay(date){
  renderCalc();
  await renderMonth();
  await renderMissedJournal();
+ await renderOrdersJournal();
 }
 
 async function renderMonth(){
@@ -1002,6 +1038,10 @@ function buildReport(){
  });
 }
 
+['ordersJournalSearch','ordersJournalType','ordersJournalMonth'].forEach(id=>{
+ const el=$(id);if(!el)return;
+ el.addEventListener(id==='ordersJournalSearch'?'input':'change',renderOrdersJournal);
+});
 ['missedJournalSearch','missedJournalCategory','missedJournalMonth'].forEach(id=>{
  const el=$(id);
  if(!el)return;
@@ -1062,6 +1102,11 @@ document.addEventListener('click',async e=>{
  if(el.dataset.newDate){
   await loadDay(el.dataset.newDate);
   document.getElementById('workDaySection').scrollIntoView({behavior:'smooth',block:'start'});
+ }
+ if(el.dataset.openOrderDay){
+  await loadDay(el.dataset.openOrderDay);
+  document.querySelector('[data-nav="homeSection"]')?.click();
+  $('workDaySection')?.scrollIntoView({behavior:'smooth',block:'start'});
  }
  if(el.id==='openMissedJournal'){
   await renderMissedJournal();
@@ -1238,7 +1283,7 @@ window.addEventListener('offline',()=>{
   await openDB();
 
   if('serviceWorker'in navigator){
-   navigator.serviceWorker.register('./sw.js?v=23',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
+   navigator.serviceWorker.register('./sw.js?v=24',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
   }
 
   $('net').textContent=navigator.onLine?'Интернет есть':'Без интернета';
