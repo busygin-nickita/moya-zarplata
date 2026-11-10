@@ -1002,7 +1002,7 @@ async function buildReport(){
   const totalWeight=daily.reduce((sum,d)=>sum+d.weight,0);
   const totalOvertime=daily.reduce((sum,d)=>sum+d.overtime,0);
   const monthName=new Date(year,monthNumber-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
-  const headers=daily.map(d=>'<th>'+d.day+'</th>').join('')+'<th class="report-total-col">ИТОГО</th>';
+  const headers=daily.map(d=>'<th>'+String(d.day).padStart(2,'0')+'.'+pad(monthNumber)+'</th>').join('')+'<th class="report-total-col">ИТОГО</th>';
   const makeRow=(label,key,format)=>'<tr><th class="report-row-label">'+label+'</th>'+daily.map(d=>'<td>'+(d.record?format(d[key]):'—')+'</td>').join('')+'<td class="report-total-col">'+format(daily.reduce((sum,d)=>sum+(Number(d[key])||0),0))+'</td></tr>';
   const table='<div class="report-table-scroll"><table class="monthly-matrix"><thead><tr><th class="report-row-label">Показатель</th>'+headers+'</tr></thead><tbody>'+makeRow('Общий вес, кг','weight',v=>Number((v||0).toFixed(2)).toLocaleString('ru-RU'))+makeRow('Переработка, ч','overtime',v=>Number((v||0).toFixed(1)).toLocaleString('ru-RU'))+'</tbody></table></div>';
   const content='<div class="print-head"><h1>Отчёт за '+esc(monthName)+'</h1></div>'+table+'<button type="button" id="printReportBtn" class="primary report-print-action" disabled>Подготавливаем PDF…</button>';
