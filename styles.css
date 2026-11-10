@@ -457,3 +457,6 @@ body.earnings-hidden-global .stats-breakdown b {
  #printReport .monthly-matrix .report-off{background:#f1f1f1}
  #printReport .print-note{font-size:7pt;color:#444}
 }
+
+.report-print-action{width:100%;margin-top:12px}
+@media print{.report-print-action{display:none!important}}
