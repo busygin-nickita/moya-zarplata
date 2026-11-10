@@ -374,3 +374,15 @@ body{padding-bottom:92px}
 }
 
 .scanner-panel-head p{line-height:1.5}
+
+/* Orders journal */
+.orders-journal-day{display:grid;gap:9px;margin-bottom:15px}
+.orders-journal-dayhead{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 2px;border-bottom:1px solid #343940}
+.orders-journal-dayhead b{font-size:13px}
+.orders-journal-dayhead span{font-size:11px;color:#aeb3bb;text-align:right}
+.orders-journal-item{gap:9px}
+.order-type-badge{font-size:10px;padding:5px 9px;border-radius:20px;background:rgba(76,155,255,.14);color:#83bdff;white-space:nowrap}
+.order-type-badge.tek{background:rgba(255,164,55,.15);color:#ffb15c}
+.orders-journal-foot{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.orders-journal-foot>b{color:#ffad52;font-size:14px}
+.orders-journal-open{min-height:35px;padding:7px 10px;font-size:11px}
