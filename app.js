@@ -1,7 +1,7 @@
 (() => {
 const $=id=>document.getElementById(id), dbName='MoyaZarplataDB', store='days';
 let db, orders=[], missed=[], currentMonth='';
-let scannerControls=null, scannerReader=null, scanTargetIndex=null;
+let scannerControls=null, scannerReader=null, scanTargetIndex=null, ocrBusy=false;
 const rates={salary:43400,kg:0.87,point:22.20,tek:0.5,overtime:500,taxRate:0.13};
 function fillSettingsInputs(){
  $('settingSalary').value=rates.salary;
@@ -107,6 +107,30 @@ function stopOrderScanner(){
   video.srcObject.getTracks().forEach(track=>track.stop());
   video.srcObject=null;
  }
+}
+async function runOrderOcr(){
+ if(ocrBusy)return;
+ const video=$('scannerVideo');
+ if(!video||!video.videoWidth){$('scannerMessage').textContent='Камера ещё не готова. Подожди секунду и нажми снова.';return;}
+ if(!window.Tesseract?.recognize){$('scannerMessage').textContent='Модуль распознавания текста не загрузился. Проверь интернет и обнови страницу.';return;}
+ ocrBusy=true;
+ $('scannerMessage').textContent='Распознаём текст… Наведи рамку на напечатанный номер рядом с надписью «ЗАКАЗ-НАРЯД №».';
+ try{
+  const canvas=document.createElement('canvas'),scale=Math.min(1,1600/video.videoWidth);
+  canvas.width=Math.round(video.videoWidth*scale);canvas.height=Math.round(video.videoHeight*scale);
+  canvas.getContext('2d',{willReadFrequently:true}).drawImage(video,0,0,canvas.width,canvas.height);
+  const result=await window.Tesseract.recognize(canvas,'eng',{logger:m=>{
+   if(m.status==='recognizing text')$('scannerMessage').textContent='Распознавание текста: '+Math.round((m.progress||0)*100)+'%';
+  }});
+  const found=[...String(result.data?.text||'').matchAll(/\b\d{7}\b/g)].map(m=>m[0]);
+  if(!found.length){$('scannerMessage').textContent='Семизначный номер не найден. Наведи камеру ближе на номер рядом с «ЗАКАЗ-НАРЯД №» и попробуй ещё раз.';return;}
+  const value=found[0];
+  if(!orders[scanTargetIndex])orders[scanTargetIndex]=emptyOrder();
+  orders[scanTargetIndex].zn=value;renderRows();renderCalc();
+  $('message').textContent='Номер ЗН распознан по тексту: '+value+'. Не забудь сохранить рабочий день.';
+  closeOrderScanner();
+ }catch(err){$('scannerMessage').textContent='Ошибка распознавания: '+(err.message||err);}
+ finally{ocrBusy=false;}
 }
 function closeOrderScanner(){
  stopOrderScanner();
@@ -1037,6 +1061,7 @@ document.addEventListener('click',async e=>{
  if(el.dataset.scanOrder!==undefined){
   await startOrderScanner(Number(el.dataset.scanOrder));
  }
+ if(el.id==='readTextNumber')await runOrderOcr();
  if(el.id==='closeScanner'||el.id==='stopScanner')closeOrderScanner();
  if(el.id==='addOrder'&&orders.length<20){
   orders.push(emptyOrder());
@@ -1194,7 +1219,7 @@ window.addEventListener('offline',()=>{
   await openDB();
 
   if('serviceWorker'in navigator){
-   navigator.serviceWorker.register('./sw.js?v=21',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
+   navigator.serviceWorker.register('./sw.js?v=22',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
   }
 
   $('net').textContent=navigator.onLine?'Интернет есть':'Без интернета';
