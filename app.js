@@ -1268,7 +1268,7 @@ $('statsYear').addEventListener('change',renderStats);
 $('exportStatsBtn').addEventListener('click',exportStatsCSV);
 $('calendarMonth').addEventListener('change',e=>renderCalendar(e.target.value));
 
-window.addEventListener('online',()=>{
+$('toggleEarningsVisibility')?.addEventListener('click',()=>{\n earningsHidden=!earningsHidden;\n localStorage.setItem('MZ_EARNINGS_HIDDEN',earningsHidden?'1':'0');\n applyEarningsVisibility();\n});\n\nwindow.addEventListener('online',()=>{
  $('net').textContent='Интернет есть';
  $('net').className='pill green';
  sync();
@@ -1284,7 +1284,7 @@ window.addEventListener('offline',()=>{
   await openDB();
 
   if('serviceWorker'in navigator){
-   navigator.serviceWorker.register('./sw.js?v=25',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
+   navigator.serviceWorker.register('./sw.js?v=26',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
   }
 
   $('net').textContent=navigator.onLine?'Интернет есть':'Без интернета';
