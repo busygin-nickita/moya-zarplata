@@ -388,7 +388,7 @@ body{padding-bottom:92px}
 .orders-journal-open{min-height:35px;padding:7px 10px;font-size:11px}
 
 /* Earnings privacy toggle */
-.hero-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.visibility-btn{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.24);border-radius:11px;background:rgba(255,255,255,.09);color:#fff}
+.hero-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;position:relative;z-index:2;min-height:36px}.hero-title-row .eyebrow{flex:1;min-width:0}
+.visibility-btn{position:relative;z-index:3;visibility:visible;opacity:1;width:40px;height:40px;min-width:40px;flex:0 0 40px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.24);border-radius:11px;background:rgba(255,255,255,.09);color:#fff}
 .visibility-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .earnings-hidden{filter:blur(9px);user-select:none}
