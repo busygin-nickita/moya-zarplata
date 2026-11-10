@@ -118,13 +118,13 @@ async function startOrderScanner(index){
  panel.hidden=false;
  $('scannerMessage').textContent='Запрашиваем доступ к камере…';
  panel.scrollIntoView({behavior:'smooth',block:'center'});
- if(!window.ZXingBrowser?.BrowserMultiFormatReader){
+ if(!window.ZXing?.BrowserMultiFormatReader){
   $('scannerMessage').textContent='Модуль сканирования не загрузился. Проверь интернет и обнови страницу.';
   return;
  }
  try{
   stopOrderScanner();
-  scannerReader=new window.ZXingBrowser.BrowserMultiFormatReader();
+  scannerReader=new window.ZXing.BrowserMultiFormatReader();
   $('scannerMessage').textContent='Наведи камеру на штрихкод или QR-код заказа.';
   scannerControls=await scannerReader.decodeFromVideoDevice(undefined,$('scannerVideo'),(result,error)=>{
    if(result){
@@ -1181,7 +1181,7 @@ window.addEventListener('offline',()=>{
   await openDB();
 
   if('serviceWorker'in navigator){
-   navigator.serviceWorker.register('./sw.js?v=18',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
+   navigator.serviceWorker.register('./sw.js?v=19',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
   }
 
   $('net').textContent=navigator.onLine?'Интернет есть':'Без интернета';
