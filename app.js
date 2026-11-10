@@ -1003,12 +1003,12 @@ function buildReport(){
   const headers=daily.map(d=>'<th>'+d.day+'</th>').join('')+'<th class="report-total-col">ИТОГО</th>';
   const makeRow=(label,key,format)=>'<tr><th class="report-row-label">'+label+'</th>'+daily.map(d=>'<td>'+(d.record?format(d[key]):'—')+'</td>').join('')+'<td class="report-total-col">'+format(daily.reduce((sum,d)=>sum+(Number(d[key])||0),0))+'</td></tr>';
   const table='<div class="report-table-scroll"><table class="monthly-matrix"><thead><tr><th class="report-row-label">Показатель</th>'+headers+'</tr></thead><tbody>'+makeRow('Общий вес, кг','weight',v=>Number((v||0).toFixed(2)).toLocaleString('ru-RU'))+makeRow('Переработка, ч','overtime',v=>Number((v||0).toFixed(1)).toLocaleString('ru-RU'))+'</tbody></table></div>';
-  const content='<div class="print-head"><h1>Отчёт за '+esc(monthName)+'</h1></div>'+table;
+  const content='<div class="print-head"><h1>Отчёт за '+esc(monthName)+'</h1></div>'+table+'<button type="button" id="printReportBtn" class="primary report-print-action">Печать / Сохранить PDF</button>';
   $('printReport').innerHTML=content;
   $('reportPreview').innerHTML=content;
   $('printReport').classList.add('ready');
   $('reportPreview').scrollIntoView({behavior:'smooth',block:'nearest'});
-  setTimeout(()=>window.print(),250);
+  // Печать запускается отдельной кнопкой по прямому нажатию пользователя.
  });
 }
 
@@ -1164,6 +1164,7 @@ document.addEventListener('click',async e=>{
  }
 
  if(el.id==='printBtn')buildReport();
+ if(el.id==='printReportBtn')window.print();
 
  if(el.id==='saveRatesBtn')await saveRateSettings();
  if(el.id==='exportStatsSettingsBtn')exportStatsCSV();
@@ -1263,7 +1264,7 @@ window.addEventListener('offline',()=>{
   await openDB();
 
   if('serviceWorker'in navigator){
-   navigator.serviceWorker.register('./sw.js?v=27',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
+   navigator.serviceWorker.register('./sw.js?v=28',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
   }
 
   $('net').textContent=navigator.onLine?'Интернет есть':'Без интернета';
