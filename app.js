@@ -1,7 +1,7 @@
 (() => {
 const $=id=>document.getElementById(id), dbName='MoyaZarplataDB', store='days';
 let db, orders=[], missed=[], currentMonth='';
-let scannerControls=null, scannerReader=null, scanTargetIndex=null, ocrBusy=false;
+let scannerControls=null, scannerReader=null, scanTargetIndex=null, ocrBusy=false, scannerDuplicateWarned=false;
 const rates={salary:43400,kg:0.87,point:22.20,tek:0.5,overtime:500,taxRate:0.13};
 function fillSettingsInputs(){
  $('settingSalary').value=rates.salary;
@@ -97,6 +97,22 @@ function emptyMissed(){
 }
 
 
+function findDuplicateOrderNumber(value,exceptIndex=-1){
+ const normalized=String(value||'').trim().toUpperCase().replace(/[^A-ZА-ЯЁ0-9]/g,'');
+ if(!normalized)return -1;
+ return orders.findIndex((order,index)=>index!==exceptIndex&&String(order.zn||'').trim().toUpperCase().replace(/[^A-ZА-ЯЁ0-9]/g,'')===normalized);
+}
+function warnDuplicateOrder(value,index){
+ const duplicateIndex=findDuplicateOrderNumber(value,index);
+ if(duplicateIndex<0)return false;
+ $('scannerMessage').textContent='Этот ЗН уже добавлен в заказ №'+(duplicateIndex+1)+'. Повторно добавить его нельзя.';
+ if(!scannerDuplicateWarned){
+  scannerDuplicateWarned=true;
+  alert('Дубликат ЗН: '+value+' уже есть в заказе №'+(duplicateIndex+1)+' за этот рабочий день.');
+ }
+ return true;
+}
+
 function stopOrderScanner(){
  try{scannerControls?.stop();}catch(e){}
  scannerControls=null;
@@ -125,6 +141,7 @@ async function runOrderOcr(){
   const found=[...String(result.data?.text||'').matchAll(/\b\d{7}\b/g)].map(m=>m[0]);
   if(!found.length){$('scannerMessage').textContent='Семизначный номер не найден. Наведи камеру ближе на номер рядом с «ЗАКАЗ-НАРЯД №» и попробуй ещё раз.';return;}
   const value=found[0];
+  if(warnDuplicateOrder(value,scanTargetIndex))return;
   if(!orders[scanTargetIndex])orders[scanTargetIndex]=emptyOrder();
   orders[scanTargetIndex].zn=value;renderRows();renderCalc();
   $('message').textContent='Номер ЗН распознан по тексту: '+value+'. Не забудь сохранить рабочий день.';
@@ -138,6 +155,7 @@ function closeOrderScanner(){
 }
 async function startOrderScanner(index){
  scanTargetIndex=index;
+ scannerDuplicateWarned=false;
  const panel=$('scannerPanel');
  panel.hidden=false;
  $('scannerMessage').textContent='Запрашиваем доступ к камере…';
@@ -167,6 +185,7 @@ async function startOrderScanner(index){
    if(result){
     const value=String(result.getText()||'').trim();
     if(!value)return;
+    if(warnDuplicateOrder(value,scanTargetIndex))return;
     if(!orders[scanTargetIndex])orders[scanTargetIndex]=emptyOrder();
     orders[scanTargetIndex].zn=value;
     renderRows();
