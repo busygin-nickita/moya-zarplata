@@ -788,6 +788,7 @@ async function restoreAll(){
   $('message').textContent=
    `Проверка завершена. Дней найдено в Google: ${found}; добавлено на устройство: ${loaded}; месяцев: ${months.length}.`;
   await renderStats();
+  $('reportMonth').value=monthNow;
 
  }catch(e){
   $('message').textContent='Не удалось восстановить историю: '+e.message;
@@ -980,80 +981,46 @@ async function exportStatsCSV(){
 }
 
 function buildReport(){
- const month=$('month').value||monthNow;
-
+ const month=$('reportMonth').value||monthNow;
+ $('reportMonth').value=month;
  all().then(days=>{
-  const selected=days
-   .filter(d=>d.month===month)
-   .sort((a,b)=>a.date.localeCompare(b.date));
-
-  let total=0,workDays=0,orderCount=0,overtime=0,missedCount=0;
-
-  const rows=selected.map(d=>{
-   const c=calc(d);
-
-   if(d.status!=='Выходной'){
-    total+=c.total;
-    workDays++;
-   }
-
-   orderCount+=(d.orders||[]).filter(o=>
-    o.zn||Number(o.weight)||Number(o.points)
-   ).length;
-
-   overtime+=Number(d.overtime)||0;
-
-   missedCount+=(d.undelivered||[]).filter(m=>
-    m.number||m.reason
-   ).length;
-
-   return `<tr>
-    <td>${esc(d.date)}</td>
-    <td>${esc(d.status||'Рабочий')}</td>
-    <td>${esc(d.driver||'')}</td>
-    <td>${(d.orders||[]).filter(o=>o.zn||Number(o.weight)||Number(o.points)).length}</td>
-    <td>${rub(c.total)}</td>
-   </tr>`;
-  }).join('');
-
-  $('printReport').innerHTML=`
-   <div class="print-head">
-    <h1>Моя зарплата — отчёт за ${esc(month)}</h1>
-    <p>Сформировано: ${new Date().toLocaleString('ru-RU')}</p>
-   </div>
-
-   <div class="print-stats">
-    <div>Оклад: <b>${rub(rates.salary)}</b></div>
-    <div>Рабочих дней: <b>${workDays}</b></div>
-    <div>ЗН: <b>${orderCount}</b></div>
-    <div>Переработка: <b>${overtime} ч</b></div>
-    <div>Невывозы: <b>${missedCount}</b></div>
-    <div>Итого с окладом: <b>${rub(rates.salary+total)}</b></div>
-   </div>
-
-   <table>
-    <thead>
-     <tr>
-      <th>Дата</th>
-      <th>Статус</th>
-      <th>Водитель</th>
-      <th>ЗН</th>
-      <th>Начислено за день</th>
-     </tr>
-    </thead>
-    <tbody>
-     ${rows||'<tr><td colspan="5">За выбранный месяц нет сохранённых дней</td></tr>'}
-    </tbody>
-   </table>
-
-   <p class="print-note">
-    Невывозы учитываются отдельно и не уменьшают зарплату автоматически.
-    Расчёт предварительный по данным, сохранённым в приложении.
-   </p>
-  `;
-
+  const selected=days.filter(d=>String(d.date||'').startsWith(month+'-')).sort((a,b)=>a.date.localeCompare(b.date));
+  const [year,monthNumber]=month.split('-').map(Number);
+  const daysInMonth=new Date(year,monthNumber,0).getDate();
+  const byDate=new Map(selected.map(d=>[d.date,d]));
+  const daily=[];
+  for(let day=1;day<=daysInMonth;day++){
+   const date=month+'-'+String(day).padStart(2,'0');
+   const record=byDate.get(date);
+   const validOrders=(record?.orders||[]).filter(o=>o.zn||Number(o.weight)||Number(o.points));
+   const weight=validOrders.reduce((sum,o)=>sum+(Number(o.weight)||0)*1000,0);
+   const overtime=record&&record.status!=='Выходной'?(Number(record.overtime)||0):0;
+   const points=validOrders.reduce((sum,o)=>sum+(Number(o.points)||0),0);
+   const missed=(record?.undelivered||[]).filter(m=>m.number||m.reason).length;
+   daily.push({day,date,record,weight,overtime,orders:validOrders.length,points,missed});
+  }
+  const totalWeight=daily.reduce((s,d)=>s+d.weight,0);
+  const totalOvertime=daily.reduce((s,d)=>s+d.overtime,0);
+  const totalOrders=daily.reduce((s,d)=>s+d.orders,0);
+  const totalPoints=daily.reduce((s,d)=>s+d.points,0);
+  const totalMissed=daily.reduce((s,d)=>s+d.missed,0);
+  const monthName=new Date(year,monthNumber-1,1).toLocaleDateString('ru-RU',{month:'long',year:'numeric'});
+  const headers=daily.map(d=>'<th>'+d.day+'</th>').join('')+'<th class="report-total-col">ИТОГО</th>';
+  const row=(label,key,format)=>'<tr><th class="report-row-label">'+label+'</th>'+daily.map(d=>'<td>'+(d.record?format(d[key]):'—')+'</td>').join('')+'<td class="report-total-col">'+format(daily.reduce((s,d)=>s+(Number(d[key])||0),0))+'</td></tr>';
+  const weightRow=row('Общий вес, кг','weight',v=>Math.round(v*100)/100);
+  const overtimeRow=row('Переработка, ч','overtime',v=>Math.round(v*10)/10);
+  const ordersRow=row('Количество ЗН','orders',v=>v);
+  const pointsRow=row('Количество точек','points',v=>Math.round(v*100)/100);
+  const missedRow=row('Невывозы','missed',v=>v);
+  const statusRow='<tr><th class="report-row-label">Статус дня</th>'+daily.map(d=>'<td class="'+(d.record?.status==='Выходной'?'report-off':'')+'">'+(d.record?esc(d.record.status||'Рабочий'):'—')+'</td>').join('')+'<td class="report-total-col">—</td></tr>';
+  const table='<div class="report-table-scroll"><table class="monthly-matrix"><thead><tr><th class="report-row-label">Показатель</th>'+headers+'</tr></thead><tbody>'+weightRow+overtimeRow+ordersRow+pointsRow+missedRow+statusRow+'</tbody></table></div>';
+  const summary='<div class="report-summary-grid"><div>Общий вес<b>'+Math.round(totalWeight*100)/100+' кг</b></div><div>Переработка<b>'+Math.round(totalOvertime*10)/10+' ч</b></div><div>Заказ-наряды<b>'+totalOrders+'</b></div><div>Точки<b>'+Math.round(totalPoints*100)/100+'</b></div><div>Невывозы<b>'+totalMissed+'</b></div><div>Рабочих дней<b>'+selected.filter(d=>d.status!=='Выходной').length+'</b></div></div>';
+  const content='<div class="print-head"><h1>Моя зарплата — '+esc(monthName)+'</h1><p>Сводная ведомость по дням · сформировано '+new Date().toLocaleDateString('ru-RU')+'</p></div>'+summary+table+'<p class="print-note">Вес указан как сумма фактического веса всех заказ-нарядов за день. Переработка учитывается в часах по сохранённым рабочим дням.</p>';
+  $('printReport').innerHTML=content;
+  $('reportPreview').innerHTML=content;
   $('printReport').classList.add('ready');
-  window.print();
+  $('reportPreview').scrollIntoView({behavior:'smooth',block:'nearest'});
+  setTimeout(()=>window.print(),250);
  });
 }
 
