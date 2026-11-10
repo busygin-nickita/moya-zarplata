@@ -1,4 +1,4 @@
-const CACHE = 'salary-pwa-v40-explicit-monthly-print';
+const CACHE = 'salary-pwa-v41-shareable-pdf-report';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install', event => {
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
