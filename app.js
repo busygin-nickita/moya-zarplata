@@ -980,10 +980,12 @@ async function exportStatsCSV(){
  $('statsMessage').textContent='Файл CSV подготовлен для открытия в Excel.';
 }
 
-function buildReport(){
+async function buildReport(){
  const month=$('reportMonth').value||monthNow;
  $('reportMonth').value=month;
- all().then(days=>{
+ const preview=$('reportPreview');
+ try{
+  const days=await all();
   const selected=days.filter(d=>String(d.date||'').startsWith(month+'-'));
   const [year,monthNumber]=month.split('-').map(Number);
   const daysInMonth=new Date(year,monthNumber,0).getDate();
@@ -1009,8 +1011,13 @@ function buildReport(){
   $('printReport').classList.add('ready');
   $('reportPreview').scrollIntoView({behavior:'smooth',block:'nearest'});
   // Печать запускается отдельной кнопкой по прямому нажатию пользователя.
- });
+ }catch(error){
+  preview.innerHTML='<p class="message">Не удалось сформировать отчёт: '+esc(error.message||String(error))+'</p>';
+ }
 }
+
+$('printBtn')?.addEventListener('click',buildReport);
+$('reportMonth')?.addEventListener('change',()=>{ $('reportPreview').innerHTML='<p class="message">Нажми «Сформировать отчёт», чтобы обновить таблицу.</p>'; });
 
 ['ordersJournalSearch','ordersJournalType','ordersJournalMonth','ordersJournalDate'].forEach(id=>{
  const el=$(id);if(!el)return;
@@ -1163,7 +1170,6 @@ document.addEventListener('click',async e=>{
   }
  }
 
- if(el.id==='printBtn')buildReport();
  if(el.id==='printReportBtn')window.print();
 
  if(el.id==='saveRatesBtn')await saveRateSettings();
@@ -1264,7 +1270,7 @@ window.addEventListener('offline',()=>{
   await openDB();
 
   if('serviceWorker'in navigator){
-   navigator.serviceWorker.register('./sw.js?v=28',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
+   navigator.serviceWorker.register('./sw.js?v=29',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
   }
 
   $('net').textContent=navigator.onLine?'Интернет есть':'Без интернета';
