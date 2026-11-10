@@ -392,3 +392,32 @@ body{padding-bottom:92px}
 .visibility-btn{position:relative;z-index:3;visibility:visible;opacity:1;width:40px;height:40px;min-width:40px;flex:0 0 40px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.24);border-radius:11px;background:rgba(255,255,255,.09);color:#fff}
 .visibility-btn svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .earnings-hidden{filter:blur(9px);user-select:none}
+
+/* Hide earnings amounts across all app sections */
+body.earnings-hidden-global #monthTotal,
+body.earnings-hidden-global #monthNet,
+body.earnings-hidden-global #statTotal,
+body.earnings-hidden-global #statTax,
+body.earnings-hidden-global #statNet,
+body.earnings-hidden-global #statSalary,
+body.earnings-hidden-global #statWeightPay,
+body.earnings-hidden-global #statPointsPay,
+body.earnings-hidden-global #statOvertimePay,
+body.earnings-hidden-global #statForecast,
+body.earnings-hidden-global #calendarTotal,
+body.earnings-hidden-global #dayTotal,
+body.earnings-hidden-global #weightPay,
+body.earnings-hidden-global #pointsPay,
+body.earnings-hidden-global .order-card-total b,
+body.earnings-hidden-global .orders-journal-dayhead span,
+body.earnings-hidden-global .orders-journal-foot>b,
+body.earnings-hidden-global .stats-bar-value,
+body.earnings-hidden-global .day-item span:nth-child(2),
+body.earnings-hidden-global .calendar-day-amount,
+body.earnings-hidden-global .calendar-detail strong,
+body.earnings-hidden-global .stats-forecast,
+body.earnings-hidden-global .stats-compare,
+body.earnings-hidden-global .stats-breakdown b {
+ filter:blur(9px);
+ user-select:none;
+}
