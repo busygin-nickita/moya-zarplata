@@ -124,9 +124,22 @@ async function startOrderScanner(index){
  }
  try{
   stopOrderScanner();
-  scannerReader=new window.ZXingBrowser.BrowserMultiFormatReader();
-  $('scannerMessage').textContent='Наведи камеру на штрихкод или QR-код заказа.';
-  scannerControls=await scannerReader.decodeFromVideoDevice(undefined,$('scannerVideo'),(result,error)=>{
+  const ZX=window.ZXingBrowser;
+  const hints=new Map();
+  if(ZX.DecodeHintType&&ZX.BarcodeFormat){
+   hints.set(ZX.DecodeHintType.TRY_HARDER,true);
+   hints.set(ZX.DecodeHintType.POSSIBLE_FORMATS,[
+    ZX.BarcodeFormat.CODE_128,ZX.BarcodeFormat.CODE_39,ZX.BarcodeFormat.CODE_93,
+    ZX.BarcodeFormat.CODABAR,ZX.BarcodeFormat.ITF,ZX.BarcodeFormat.EAN_13,
+    ZX.BarcodeFormat.EAN_8,ZX.BarcodeFormat.UPC_A,ZX.BarcodeFormat.UPC_E,
+    ZX.BarcodeFormat.QR_CODE
+   ].filter(Boolean));
+  }
+  scannerReader=new ZX.BrowserMultiFormatReader(hints.size?hints:undefined,400);
+  $('scannerMessage').textContent='Наведи заднюю камеру на весь штрихкод. Держи телефон ровно и дождись фокусировки.';
+  scannerControls=await scannerReader.decodeFromConstraints({video:{
+   facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}
+  }},$('scannerVideo'),(result,error)=>{
    if(result){
     const value=String(result.getText()||'').trim();
     if(!value)return;
