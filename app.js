@@ -1032,12 +1032,29 @@ async function buildReport(){
   try{
    if(!window.html2canvas||!window.jspdf?.jsPDF)throw new Error('Не загрузились модули PDF. Проверь интернет и обнови страницу.');
    const sheet=document.createElement('div');
-   sheet.style.cssText='position:fixed;left:-10000px;top:0;width:1600px;padding:36px;background:#fff;color:#111;font-family:Arial,sans-serif;z-index:-1';
+   const dayColumnWidth=44, labelColumnWidth=220;
+   sheet.style.cssText='position:fixed;left:-10000px;top:0;width:1600px;padding:36px;background:#fff;color:#111;font-family:Arial,sans-serif;z-index:-1;box-sizing:border-box';
    sheet.innerHTML='<h1 style="font-size:30px;margin:0 0 24px">Отчёт за '+esc(monthName)+'</h1>'+table;
    const tbl=sheet.querySelector('table');
-   tbl.style.cssText='width:100%;border-collapse:collapse;table-layout:fixed;font-size:15px;color:#111';
-   sheet.querySelectorAll('th,td').forEach(cell=>{cell.style.cssText+=';border:1px solid #555;padding:9px 3px;text-align:center;white-space:nowrap;color:#111;background:#fff'});
-   sheet.querySelectorAll('th:first-child').forEach(cell=>{cell.style.minWidth='130px';cell.style.textAlign='left'});
+   tbl.style.cssText='width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px;color:#111';
+   const firstHeader=tbl.querySelector('thead th:first-child');
+   if(firstHeader)firstHeader.style.width=labelColumnWidth+'px';
+   tbl.querySelectorAll('thead th:not(:first-child)').forEach(cell=>cell.style.width=dayColumnWidth+'px');
+   tbl.querySelectorAll('tbody tr').forEach(row=>{
+    const first=row.querySelector('th:first-child');
+    if(first)first.style.width=labelColumnWidth+'px';
+   });
+   sheet.querySelectorAll('th,td').forEach(cell=>{
+    cell.style.cssText+=';border:1px solid #555;padding:8px 3px;text-align:center;white-space:nowrap;overflow:hidden;color:#111;background:#fff;box-sizing:border-box';
+   });
+   sheet.querySelectorAll('th:first-child').forEach(cell=>{
+    cell.style.width=labelColumnWidth+'px';
+    cell.style.minWidth=labelColumnWidth+'px';
+    cell.style.textAlign='left';
+    cell.style.whiteSpace='normal';
+    cell.style.fontSize='12px';
+   });
+   sheet.querySelectorAll('th:last-child,td:last-child').forEach(cell=>cell.style.fontWeight='bold');
    document.body.appendChild(sheet);
    const canvas=await window.html2canvas(sheet,{backgroundColor:'#ffffff',scale:2,windowWidth:1700});
    sheet.remove();
