@@ -1,4 +1,4 @@
-const CACHE = 'salary-pwa-v32-earnings-privacy-visible';
+const CACHE = 'salary-pwa-v33-earnings-privacy-forced';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install', event => {
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
