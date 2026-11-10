@@ -1032,14 +1032,19 @@ async function buildReport(){
   try{
    if(!window.html2canvas||!window.jspdf?.jsPDF)throw new Error('Не загрузились модули PDF. Проверь интернет и обнови страницу.');
    const sheet=document.createElement('div');
-   const dayColumnWidth=44, labelColumnWidth=220;
-   sheet.style.cssText='position:fixed;left:-10000px;top:0;width:1600px;padding:36px;background:#fff;color:#111;font-family:Arial,sans-serif;z-index:-1;box-sizing:border-box';
+   // Фиксируем ширину каждой колонки отдельно: браузер больше не сможет
+   // сжать последний день месяца из-за колонки «ИТОГО».
+   const dayColumnWidth=42, labelColumnWidth=220, totalColumnWidth=60;
+   const tableWidth=labelColumnWidth+dayColumnWidth*daily.length+totalColumnWidth;
+   sheet.style.cssText='position:fixed;left:-10000px;top:0;width:'+(tableWidth+72)+'px;padding:36px;background:#fff;color:#111;font-family:Arial,sans-serif;z-index:-1;box-sizing:border-box';
    sheet.innerHTML='<h1 style="font-size:30px;margin:0 0 24px">Отчёт за '+esc(monthName)+'</h1>'+table;
    const tbl=sheet.querySelector('table');
-   tbl.style.cssText='width:100%;border-collapse:collapse;table-layout:fixed;font-size:13px;color:#111';
-   const firstHeader=tbl.querySelector('thead th:first-child');
-   if(firstHeader)firstHeader.style.width=labelColumnWidth+'px';
-   tbl.querySelectorAll('thead th:not(:first-child)').forEach(cell=>cell.style.width=dayColumnWidth+'px');
+   tbl.style.cssText='width:'+tableWidth+'px;min-width:'+tableWidth+'px;border-collapse:collapse;table-layout:fixed;font-size:13px;color:#111';
+   const colgroup=document.createElement('colgroup');
+   const labelCol=document.createElement('col');labelCol.style.width=labelColumnWidth+'px';colgroup.appendChild(labelCol);
+   for(let i=0;i<daily.length;i++){const col=document.createElement('col');col.style.width=dayColumnWidth+'px';colgroup.appendChild(col);}
+   const totalCol=document.createElement('col');totalCol.style.width=totalColumnWidth+'px';colgroup.appendChild(totalCol);
+   tbl.insertBefore(colgroup,tbl.firstChild);
    tbl.querySelectorAll('tbody tr').forEach(row=>{
     const first=row.querySelector('th:first-child');
     if(first)first.style.width=labelColumnWidth+'px';
