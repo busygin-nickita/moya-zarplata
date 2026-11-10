@@ -117,7 +117,7 @@
 <div id="scannerPanel" class="scanner-panel" hidden>
  <div class="scanner-panel-head"><div><b><svg class="button-icon"><use href="#i-scan"/></svg>Сканирование заказа</b><p id="scannerMessage">Разреши доступ к камере и наведи её на штрихкод или QR-код.</p></div><button type="button" id="closeScanner" class="remove" aria-label="Закрыть сканер">×</button></div>
  <div class="scanner-video-wrap"><video id="scannerVideo" playsinline muted></video><div class="scanner-target"></div></div>
- <div class="scanner-actions"><button type="button" id="stopScanner" class="secondary">Остановить камеру</button></div>
+ <div class="scanner-actions"><button type="button" id="readTextNumber" class="small-btn">Распознать номер по тексту</button><button type="button" id="stopScanner" class="secondary">Остановить камеру</button></div>
  <p class="scanner-hint">Если код не считывается, можно ввести номер ЗН вручную в поле заказа.</p>
 </div>
 <div id="orders"></div>
@@ -197,5 +197,5 @@
 </nav>
 <section id="printReport" aria-hidden="true></section>
 <footer>Локальное хранение · Google Sheets при подключении интернета</footer>
-<script src="config.js?v=15"></script><script src="https://unpkg.com/@zxing/browser@0.2.1"></script><script src="app.js?v=23"></script>
+<script src="config.js?v=15"></script><script src="https://unpkg.com/@zxing/browser@0.2.1"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script><script src="app.js?v=24"></script>
 </body></html>
