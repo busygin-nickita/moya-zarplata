@@ -1285,7 +1285,7 @@ $('statsYear').addEventListener('change',renderStats);
 $('exportStatsBtn').addEventListener('click',exportStatsCSV);
 $('calendarMonth').addEventListener('change',e=>renderCalendar(e.target.value));
 
-$('toggleEarningsVisibility')?.addEventListener('click',()=>{\n earningsHidden=!earningsHidden;\n localStorage.setItem('MZ_EARNINGS_HIDDEN',earningsHidden?'1':'0');\n applyEarningsVisibility();\n});\n\n$('toggleEarningsVisibility')?.addEventListener('click',()=>{
+$('toggleEarningsVisibility')?.addEventListener('click',()=>{
  earningsHidden=!earningsHidden;
  localStorage.setItem('MZ_EARNINGS_HIDDEN',earningsHidden?'1':'0');
  applyEarningsVisibility();
