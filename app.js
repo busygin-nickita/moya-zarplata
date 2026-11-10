@@ -273,9 +273,10 @@ async function renderOrdersJournal(){
  const query=($('ordersJournalSearch')?.value||'').trim().toLowerCase();
  const type=$('ordersJournalType')?.value||'';
  const month=$('ordersJournalMonth')?.value||'';
+ const date=$('ordersJournalDate')?.value||'';
  const filtered=records.filter(r=>
   (!query||String(r.order.zn||'').toLowerCase().includes(query))&&
-  (!type||(r.order.type||'Обычная')===type)&&(!month||r.date.startsWith(month))
+  (!type||(r.order.type||'Обычная')===type)&&(!month||r.date.startsWith(month))&&(!date||r.date===date)
  );
  $('ordersJournalCount').textContent=String(filtered.length);
  $('ordersJournalSummary').textContent='Всего: '+records.length+' · Обычная: '+records.filter(r=>(r.order.type||'Обычная')==='Обычная').length+' · ТЭК: '+records.filter(r=>r.order.type==='ТЭК').length;
@@ -1038,7 +1039,7 @@ function buildReport(){
  });
 }
 
-['ordersJournalSearch','ordersJournalType','ordersJournalMonth'].forEach(id=>{
+['ordersJournalSearch','ordersJournalType','ordersJournalMonth','ordersJournalDate'].forEach(id=>{
  const el=$(id);if(!el)return;
  el.addEventListener(id==='ordersJournalSearch'?'input':'change',renderOrdersJournal);
 });
@@ -1283,7 +1284,7 @@ window.addEventListener('offline',()=>{
   await openDB();
 
   if('serviceWorker'in navigator){
-   navigator.serviceWorker.register('./sw.js?v=24',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
+   navigator.serviceWorker.register('./sw.js?v=25',{updateViaCache:'none'}).then(reg=>reg.update()).catch(err=>console.warn('Service worker update failed:',err));
   }
 
   $('net').textContent=navigator.onLine?'Интернет есть':'Без интернета';
