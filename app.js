@@ -1,6 +1,6 @@
 (() => {
 const $=id=>document.getElementById(id), dbName='MoyaZarplataDB', store='days';
-let db, orders=[], missed=[], currentMonth='';
+let db, orders=[], missed=[], currentMonth='', monthlyReportPdfBlob=null;
 let scannerControls=null, scannerReader=null, scanTargetIndex=null, ocrBusy=false, scannerDuplicateWarned=false;
 const rates={salary:43400,kg:0.87,point:22.20,tek:0.5,overtime:500,taxRate:0.13};
 function fillSettingsInputs(){
@@ -1005,16 +1005,52 @@ async function buildReport(){
   const headers=daily.map(d=>'<th>'+d.day+'</th>').join('')+'<th class="report-total-col">ИТОГО</th>';
   const makeRow=(label,key,format)=>'<tr><th class="report-row-label">'+label+'</th>'+daily.map(d=>'<td>'+(d.record?format(d[key]):'—')+'</td>').join('')+'<td class="report-total-col">'+format(daily.reduce((sum,d)=>sum+(Number(d[key])||0),0))+'</td></tr>';
   const table='<div class="report-table-scroll"><table class="monthly-matrix"><thead><tr><th class="report-row-label">Показатель</th>'+headers+'</tr></thead><tbody>'+makeRow('Общий вес, кг','weight',v=>Number((v||0).toFixed(2)).toLocaleString('ru-RU'))+makeRow('Переработка, ч','overtime',v=>Number((v||0).toFixed(1)).toLocaleString('ru-RU'))+'</tbody></table></div>';
-  const content='<div class="print-head"><h1>Отчёт за '+esc(monthName)+'</h1></div>'+table+'<button type="button" id="printReportBtn" class="primary report-print-action">Печать / Сохранить PDF</button>';
+  const content='<div class="print-head"><h1>Отчёт за '+esc(monthName)+'</h1></div>'+table+'<button type="button" id="printReportBtn" class="primary report-print-action" disabled>Подготавливаем PDF…</button>';
   $('printReport').innerHTML=content;
   $('reportPreview').innerHTML=content;
   $('printReport').classList.add('ready');
   $('printReport').setAttribute('aria-hidden','false');
   $('reportPreview').scrollIntoView({behavior:'smooth',block:'nearest'});
-  $('printReportBtn')?.addEventListener('click',()=>{
-   if(typeof window.print==='function')window.print();
-   else preview.insertAdjacentHTML('beforeend','<p class="message">Печать не поддерживается этим браузером. Открой приложение в Safari.</p>');
+  monthlyReportPdfBlob=null;
+  const pdfButton=$('printReportBtn');
+  if(pdfButton)pdfButton.addEventListener('click',async()=>{
+   if(!monthlyReportPdfBlob)return;
+   const file=new File([monthlyReportPdfBlob],'otchet-'+month+'.pdf',{type:'application/pdf'});
+   try{
+    if(navigator.share&&(!navigator.canShare||navigator.canShare({files:[file]}))){
+     await navigator.share({files:[file],title:'Отчёт за '+monthName});
+    }else{
+     const url=URL.createObjectURL(monthlyReportPdfBlob);
+     const link=document.createElement('a');link.href=url;link.download=file.name;
+     document.body.appendChild(link);link.click();link.remove();
+     setTimeout(()=>URL.revokeObjectURL(url),60000);
+    }
+   }catch(err){
+    if(err.name!=='AbortError')preview.insertAdjacentHTML('beforeend','<p class="message">Не удалось открыть меню отправки: '+esc(err.message||String(err))+'</p>');
+   }
   });
+  try{
+   if(!window.html2canvas||!window.jspdf?.jsPDF)throw new Error('Не загрузились модули PDF. Проверь интернет и обнови страницу.');
+   const sheet=document.createElement('div');
+   sheet.style.cssText='position:fixed;left:-10000px;top:0;width:1600px;padding:36px;background:#fff;color:#111;font-family:Arial,sans-serif;z-index:-1';
+   sheet.innerHTML='<h1 style="font-size:30px;margin:0 0 24px">Отчёт за '+esc(monthName)+'</h1>'+table;
+   const tbl=sheet.querySelector('table');
+   tbl.style.cssText='width:100%;border-collapse:collapse;table-layout:fixed;font-size:15px;color:#111';
+   sheet.querySelectorAll('th,td').forEach(cell=>{cell.style.cssText+=';border:1px solid #555;padding:9px 3px;text-align:center;white-space:nowrap;color:#111;background:#fff'});
+   sheet.querySelectorAll('th:first-child').forEach(cell=>{cell.style.minWidth='130px';cell.style.textAlign='left'});
+   document.body.appendChild(sheet);
+   const canvas=await window.html2canvas(sheet,{backgroundColor:'#ffffff',scale:2,windowWidth:1700});
+   sheet.remove();
+   const pdf=new window.jspdf.jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+   const pageWidth=pdf.internal.pageSize.getWidth()-16;
+   const imageHeight=canvas.height*pageWidth/canvas.width;
+   pdf.addImage(canvas.toDataURL('image/jpeg',0.95),'JPEG',8,12,pageWidth,Math.min(imageHeight,pdf.internal.pageSize.getHeight()-24));
+   monthlyReportPdfBlob=pdf.output('blob');
+   pdfButton.disabled=false;pdfButton.textContent='Скачать / Поделиться PDF';
+  }catch(pdfError){
+   if(pdfButton){pdfButton.disabled=true;pdfButton.textContent='PDF не подготовлен';}
+   preview.insertAdjacentHTML('beforeend','<p class="message">Не удалось подготовить PDF: '+esc(pdfError.message||String(pdfError))+'</p>');
+  }
  }catch(error){
   preview.innerHTML='<p class="message">Не удалось сформировать отчёт: '+esc(error.message||String(error))+'</p>';
  }
@@ -1174,8 +1210,6 @@ document.addEventListener('click',async e=>{
    $('message').textContent='Не удалось удалить запись: '+err.message;
   }
  }
-
- if(el.id==='printReportBtn')window.print();
 
  if(el.id==='saveRatesBtn')await saveRateSettings();
  if(el.id==='exportStatsSettingsBtn')exportStatsCSV();
