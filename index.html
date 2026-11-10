@@ -161,8 +161,10 @@
 
 <section class="card">
 <div class="section-head"><h2><svg class="heading-icon "><use href="#i-chart"/></svg>Отчёт за месяц</h2><span class="pill">A4 / PDF</span></div>
-<p class="message">Сформируй месячную ведомость для печати или сохранения в PDF.</p>
-<button id="printBtn" class="primary" style="width:100%;margin-top:10px">Сформировать отчёт и печать</button>
+<p class="message">Сводная таблица: каждый день месяца — отдельный столбец. Учитываются общий вес всех ЗН и переработка.</p>
+<label class="report-month-label">Месяц отчёта<input id="reportMonth" type="month"></label>
+<button id="printBtn" class="primary" style="width:100%;margin-top:10px">Сформировать отчёт и печать / PDF</button>
+<div id="reportPreview" class="report-preview"><p class="message">Выбери месяц и сформируй отчёт.</p></div>
 </section>
 <section class="card settings-section" id="settingsSection">
  <div class="section-head"><h2><svg class="heading-icon "><use href="#i-settings"/></svg>Настройки</h2><span class="pill">Параметры приложения</span></div>
@@ -208,5 +210,5 @@
 </nav>
 <section id="printReport" aria-hidden="true></section>
 <footer>Локальное хранение · Google Sheets при подключении интернета</footer>
-<script src="config.js?v=15"></script><script src="https://unpkg.com/@zxing/browser@0.2.1"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script><script src="app.js?v=32"></script>
+<script src="config.js?v=15"></script><script src="https://unpkg.com/@zxing/browser@0.2.1"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script><script src="app.js?v=33"></script>
 </body></html>
