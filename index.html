@@ -100,6 +100,16 @@
  </div>
  <div class="analytics-note" id="analyticsNote">Показатели рассчитываются по сохранённым дням выбранного месяца.</div>
 </section>
+<section class="card feature-card" id="ordersJournalSection">
+ <div class="section-head"><h2><svg class="heading-icon"><use href="#i-package"/></svg>Журнал заказ-нарядов</h2><span class="pill" id="ordersJournalCount">0</span></div>
+ <div class="missed-journal-summary"><b id="ordersJournalSummary">Всего: 0</b><span>Все сохранённые рабочие дни</span></div>
+ <div class="missed-journal-filters">
+  <input id="ordersJournalSearch" type="search" placeholder="Поиск по номеру ЗН" aria-label="Поиск по номеру ЗН">
+  <select id="ordersJournalType" aria-label="Фильтр по типу"><option value="">Все типы</option><option value="Обычная">Обычная</option><option value="ТЭК">ТЭК</option></select>
+  <input id="ordersJournalMonth" type="month" aria-label="Фильтр по месяцу">
+ </div>
+ <div id="ordersJournalList" class="missed-journal-list"><p class="message">Загружаем журнал…</p></div>
+</section>
 
 <section class="card" id="workDaySection">
 <div class="section-head"><h2><svg class="heading-icon "><use href="#i-calendar"/></svg>Рабочий день</h2><button id="todayBtn" class="text-btn">Сегодня</button></div>
@@ -197,5 +207,5 @@
 </nav>
 <section id="printReport" aria-hidden="true></section>
 <footer>Локальное хранение · Google Sheets при подключении интернета</footer>
-<script src="config.js?v=15"></script><script src="https://unpkg.com/@zxing/browser@0.2.1"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script><script src="app.js?v=25"></script>
+<script src="config.js?v=15"></script><script src="https://unpkg.com/@zxing/browser@0.2.1"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script><script src="app.js?v=26"></script>
 </body></html>
