@@ -421,3 +421,39 @@ body.earnings-hidden-global .stats-breakdown b {
  filter:blur(9px);
  user-select:none;
 }
+
+/* Monthly report matrix */
+.report-month-label{display:block;margin:12px 0 4px;color:#aeb3bb;font-size:12px}
+.report-month-label input{display:block;width:100%;margin-top:6px;min-height:44px;padding:10px 12px;border-radius:12px;background:#101215;color:#fff;border:1px solid #383d44}
+.report-preview{margin-top:14px;overflow:hidden}
+.report-preview .print-head h1{font-size:18px;margin:0 0 5px}
+.report-preview .print-head p{font-size:11px;color:#aeb3bb;margin:0 0 12px}
+.report-summary-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:12px 0}
+.report-summary-grid div{padding:10px;border:1px solid #363b42;border-radius:10px;background:#171a1e;color:#aeb3bb;font-size:11px}
+.report-summary-grid b{display:block;margin-top:4px;color:#ffad52;font-size:15px}
+.report-table-scroll{overflow-x:auto;max-width:100%;border:1px solid #3b4047;border-radius:10px}
+.monthly-matrix{border-collapse:collapse;min-width:max-content;width:100%;font-size:10px}
+.monthly-matrix th,.monthly-matrix td{padding:8px 7px;text-align:center;border:1px solid #393e45;white-space:nowrap}
+.monthly-matrix thead th{background:#282d33;color:#fff}
+.monthly-matrix .report-row-label{position:sticky;left:0;z-index:1;text-align:left;background:#202429;min-width:130px}
+.monthly-matrix .report-total-col{background:rgba(255,145,45,.13);font-weight:800;color:#ffb15c}
+.monthly-matrix .report-off{background:rgba(255,145,45,.16)}
+.report-preview .print-note{font-size:10px;color:#9da3ab;margin-top:10px;line-height:1.4}
+@media print{
+ @page{size:A4 landscape;margin:8mm}
+ body{background:#fff!important;color:#111!important}
+ #printReport{font:8pt Arial,sans-serif}
+ #printReport h1{font-size:16pt;margin-bottom:3mm}
+ #printReport .print-head p{font-size:8pt}
+ #printReport .report-summary-grid{grid-template-columns:repeat(6,1fr);gap:4px;margin:4mm 0}
+ #printReport .report-summary-grid div{padding:5px;border:1px solid #aaa;border-radius:0;background:#fff;color:#333}
+ #printReport .report-summary-grid b{font-size:10pt;color:#111}
+ #printReport .report-table-scroll{overflow:visible;border:0}
+ #printReport .monthly-matrix{width:100%;min-width:0;table-layout:auto;font-size:6.5pt}
+ #printReport .monthly-matrix th,#printReport .monthly-matrix td{padding:4px 2px;border:1px solid #888;white-space:normal}
+ #printReport .monthly-matrix .report-row-label{position:static;min-width:90px;background:#eee;color:#111}
+ #printReport .monthly-matrix thead th{background:#e5e5e5;color:#111}
+ #printReport .monthly-matrix .report-total-col{background:#dce8f2;color:#111}
+ #printReport .monthly-matrix .report-off{background:#f1f1f1}
+ #printReport .print-note{font-size:7pt;color:#444}
+}
