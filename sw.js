@@ -1,4 +1,4 @@
-const CACHE = 'salary-pwa-v23-order-scanner-fix';
+const CACHE = 'salary-pwa-v24-browser-package';
 const ASSETS = ['./','./index.html','./styles.css','./app.js','./config.js','./manifest.webmanifest','./icon.svg'];
 self.addEventListener('install', event => {
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
