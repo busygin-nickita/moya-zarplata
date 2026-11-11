@@ -290,7 +290,12 @@ async function renderOrdersJournal(){
  const query=($('ordersJournalSearch')?.value||'').trim().toLowerCase();
  const type=$('ordersJournalType')?.value||'';
  const month=$('ordersJournalMonth')?.value||'';
- const date=$('ordersJournalDate')?.value||'';
+ const dateInput=$('ordersJournalDate');
+ if(!window.__ordersJournalDateInitialized){
+  if(dateInput&&!dateInput.value)dateInput.value=today.getFullYear()+'-'+pad(today.getMonth()+1)+'-'+pad(today.getDate());
+  window.__ordersJournalDateInitialized=true;
+ }
+ const date=dateInput?.value||'';
  const filtered=records.filter(r=>
   (!query||String(r.order.zn||'').toLowerCase().includes(query))&&
   (!type||(r.order.type||'Обычная')===type)&&(!month||r.date.startsWith(month))&&(!date||r.date===date)
@@ -1089,7 +1094,11 @@ window.addEventListener('afterprint',()=>{$('printReport')?.setAttribute('aria-h
 
 ['ordersJournalSearch','ordersJournalType','ordersJournalMonth','ordersJournalDate'].forEach(id=>{
  const el=$(id);if(!el)return;
- el.addEventListener(id==='ordersJournalSearch'?'input':'change',renderOrdersJournal);
+ el.addEventListener(id==='ordersJournalSearch'?'input':'change',()=>{
+  if(id==='ordersJournalMonth'&&el.value&&$('ordersJournalDate'))$('ordersJournalDate').value='';
+  if(id==='ordersJournalDate'&&el.value&&$('ordersJournalMonth'))$('ordersJournalMonth').value='';
+  renderOrdersJournal();
+ });
 });
 ['missedJournalSearch','missedJournalCategory','missedJournalMonth'].forEach(id=>{
  const el=$(id);
