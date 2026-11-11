@@ -304,14 +304,19 @@ async function renderOrdersJournal(){
    const coef=r.order.type==='ТЭК'?rates.tek:1;
    return sum+(Number(r.order.weight)||0)*1000*coef*rates.kg+(Number(r.order.points)||0)*coef*rates.point;
   },0);
-  return `<div class="orders-journal-day">
-   <div class="orders-journal-dayhead"><b>${new Date(date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}</b><span>${items.length} ЗН · ${rub(total)}</span></div>
-   ${items.map(r=>`<article class="missed-journal-item orders-journal-item">
-    <div class="missed-journal-top"><b>ЗН ${esc(r.order.zn||'Без номера')}</b><span class="order-type-badge ${r.order.type==='ТЭК'?'tek':''}">${esc(r.order.type||'Обычная')}</span></div>
-    <div class="missed-journal-meta"><span>${Number(r.order.weight)||0} т</span><span>${Number(r.order.points)||0} точек</span></div>
-    <div class="orders-journal-foot"><b>${rub((Number(r.order.weight)||0)*1000*(r.order.type==='ТЭК'?rates.tek:1)*rates.kg+(Number(r.order.points)||0)*(r.order.type==='ТЭК'?rates.tek:1)*rates.point)}</b><button type="button" class="secondary orders-journal-open" data-open-order-day="${date}">Открыть день</button></div>
+  return `<section class="orders-journal-day">
+   <div class="orders-journal-dayhead">
+    <div class="orders-journal-date"><span class="orders-journal-date-icon">▦</span><div><b>${new Date(date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}</b><small>${items.length} заказ-наряд${items.length===1?'':items.length<5?'а':'ов'}</small></div></div>
+    <div class="orders-journal-day-total"><small>Начислено за день</small><b>${rub(total)}</b></div>
+   </div>
+   <div class="orders-journal-cards">
+   ${items.map(r=>`<article class="orders-journal-item">
+    <div class="orders-journal-cardtop"><div class="orders-journal-number"><small>ЗАКАЗ-НАРЯД</small><b>${esc(r.order.zn||'Без номера')}</b></div><span class="order-type-badge ${r.order.type==='ТЭК'?'tek':''}">${esc(r.order.type||'Обычная')}</span></div>
+    <div class="orders-journal-metrics"><div><small>Вес</small><b>${Number(r.order.weight)||0} <i>т</i></b></div><div><small>Точки</small><b>${Number(r.order.points)||0}</b></div></div>
+    <div class="orders-journal-foot"><div><small>Начисление</small><b>${rub((Number(r.order.weight)||0)*1000*(r.order.type==='ТЭК'?rates.tek:1)*rates.kg+(Number(r.order.points)||0)*(r.order.type==='ТЭК'?rates.tek:1)*rates.point)}</b></div><button type="button" class="secondary orders-journal-open" data-open-order-day="${date}">Открыть день <span>→</span></button></div>
    </article>`).join('')}
-  </div>`;
+   </div>
+  </section>`;
  }).join(''):'<p class="message">Заказ-нарядов по выбранным условиям нет.</p>';
 }
 
