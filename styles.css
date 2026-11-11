@@ -491,3 +491,16 @@ body.earnings-hidden-global .stats-breakdown b {
 .orders-journal-open{min-height:37px;padding:8px 12px;border-radius:10px;font-size:11px}
 .orders-journal-open span{font-size:15px;margin-left:4px}
 @media(max-width:380px){#ordersJournalSection .orders-journal-dayhead{align-items:flex-start}.orders-journal-day-total b{font-size:12px}.orders-journal-number b{font-size:14px}}
+
+
+/* Order journal: one order number per full-width row */
+.orders-journal-day{display:grid;gap:10px}
+.orders-journal-dayhead{display:flex;align-items:center;justify-content:flex-start}
+.orders-journal-number-list{display:grid;grid-template-columns:1fr;gap:7px}
+.orders-journal-number-row{
+ display:flex;align-items:center;min-height:46px;padding:12px 14px;
+ border:1px solid rgba(255,145,45,.2);border-radius:12px;
+ background:linear-gradient(145deg,#202429,#14171a);
+ color:#f5f5f5;font-size:15px;font-weight:800;letter-spacing:.35px;
+ font-variant-numeric:tabular-nums;overflow-wrap:anywhere
+}
