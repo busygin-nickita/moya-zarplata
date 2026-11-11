@@ -539,7 +539,7 @@ async function renderCalendar(monthKey=$('calendarMonth').value){
   const level=amount<=0?0:Math.min(4,Math.max(1,Math.ceil(amount/max*4)));
   const selected=$('calendarSelectedDate').value===date?' selected':'';
   const label=record?rub(amount):'Нет записи';
-  cells.push(`<button type="button" class="calendar-day level-${level}${selected}" data-calendar-date="${date}" aria-label="${date}: ${esc(label)}"><span>${day}</span>${record&&amount>0?`<small>${Math.round(amount/100)/10}к</small>`:''}</button>`);
+  cells.push(`<button type="button" class="calendar-day level-${level}${selected}" data-calendar-date="${date}" aria-label="${date}: ${esc(label)}"><span>${day}</span>${record&&amount>0?`<small class="calendar-day-amount">${Math.round(amount/100)/10}к</small>`:''}</button>`);
  }
  $('earningsCalendar').innerHTML=cells.join('');
  $('calendarWorkDays').textContent=String(workDays);
