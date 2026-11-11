@@ -504,3 +504,14 @@ body.earnings-hidden-global .stats-breakdown b {
  color:#f5f5f5;font-size:15px;font-weight:800;letter-spacing:.35px;
  font-variant-numeric:tabular-nums;overflow-wrap:anywhere
 }
+
+
+/* Order type label beside each journal number */
+.orders-journal-number-row{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.orders-journal-number-row>b{min-width:0;overflow-wrap:anywhere}
+.orders-journal-type{
+ flex:0 0 auto;padding:6px 9px;border-radius:9px;
+ font-size:10px;font-weight:800;letter-spacing:.25px;white-space:nowrap
+}
+.orders-journal-type.is-tek{background:rgba(255,145,45,.16);border:1px solid rgba(255,145,45,.32);color:#ffb15c}
+.orders-journal-type.is-regular{background:rgba(120,160,210,.13);border:1px solid rgba(120,160,210,.25);color:#b9d5f5}
