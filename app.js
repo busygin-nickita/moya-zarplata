@@ -283,7 +283,8 @@ async function renderOrdersJournal(){
  const days=await all();
  const records=[];
  days.forEach(day=>(day.orders||[]).forEach((o,index)=>{
-  if(!String(o.zn||'').trim()&&!Number(o.weight)&&!Number(o.points))return;
+  const number=String(o.zn||'').trim();
+  if(!number)return;
   records.push({date:day.date,order:o,index});
  }));
  records.sort((a,b)=>b.date.localeCompare(a.date));
@@ -301,28 +302,19 @@ async function renderOrdersJournal(){
   (!type||(r.order.type||'Обычная')===type)&&(!month||r.date.startsWith(month))&&(!date||r.date===date)
  );
  $('ordersJournalCount').textContent=String(filtered.length);
- $('ordersJournalSummary').textContent='Всего: '+records.length+' · Обычная: '+records.filter(r=>(r.order.type||'Обычная')==='Обычная').length+' · ТЭК: '+records.filter(r=>r.order.type==='ТЭК').length;
+ $('ordersJournalSummary').textContent='Всего номеров ЗН: '+records.length;
  const grouped={};
  filtered.forEach(r=>(grouped[r.date]??=[]).push(r));
  $('ordersJournalList').innerHTML=Object.keys(grouped).length?Object.entries(grouped).map(([date,items])=>{
-  const total=items.reduce((sum,r)=>{
-   const coef=r.order.type==='ТЭК'?rates.tek:1;
-   return sum+(Number(r.order.weight)||0)*1000*coef*rates.kg+(Number(r.order.points)||0)*coef*rates.point;
-  },0);
   return `<section class="orders-journal-day">
    <div class="orders-journal-dayhead">
-    <div class="orders-journal-date"><span class="orders-journal-date-icon">▦</span><div><b>${new Date(date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}</b><small>${items.length} заказ-наряд${items.length===1?'':items.length<5?'а':'ов'}</small></div></div>
-    <div class="orders-journal-day-total"><small>Начислено за день</small><b>${rub(total)}</b></div>
+    <div class="orders-journal-date"><span class="orders-journal-date-icon">▦</span><div><b>${new Date(date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}</b><small>${items.length} номер${items.length===1?'':items.length<5?'а':'ов'}</small></div></div>
    </div>
-   <div class="orders-journal-cards">
-   ${items.map(r=>`<article class="orders-journal-item">
-    <div class="orders-journal-cardtop"><div class="orders-journal-number"><small>ЗАКАЗ-НАРЯД</small><b>${esc(r.order.zn||'Без номера')}</b></div><span class="order-type-badge ${r.order.type==='ТЭК'?'tek':''}">${esc(r.order.type||'Обычная')}</span></div>
-    <div class="orders-journal-metrics"><div><small>Вес</small><b>${Number(r.order.weight)||0} <i>т</i></b></div><div><small>Точки</small><b>${Number(r.order.points)||0}</b></div></div>
-    <div class="orders-journal-foot"><div><small>Начисление</small><b>${rub((Number(r.order.weight)||0)*1000*(r.order.type==='ТЭК'?rates.tek:1)*rates.kg+(Number(r.order.points)||0)*(r.order.type==='ТЭК'?rates.tek:1)*rates.point)}</b></div><button type="button" class="secondary orders-journal-open" data-open-order-day="${date}">Открыть день <span>→</span></button></div>
-   </article>`).join('')}
+   <div class="orders-journal-number-list">
+    ${items.map(r=>`<div class="orders-journal-number-row">${esc(r.order.zn)}</div>`).join('')}
    </div>
   </section>`;
- }).join(''):'<p class="message">Заказ-нарядов по выбранным условиям нет.</p>';
+ }).join(''):'<p class="message">Номеров ЗН по выбранным условиям нет.</p>';
 }
 
 async function renderMissedJournal(){
