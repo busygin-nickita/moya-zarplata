@@ -311,7 +311,7 @@ async function renderOrdersJournal(){
     <div class="orders-journal-date"><span class="orders-journal-date-icon">▦</span><div><b>${new Date(date+'T12:00:00').toLocaleDateString('ru-RU',{day:'numeric',month:'long',year:'numeric'})}</b><small>${items.length} номер${items.length===1?'':items.length<5?'а':'ов'}</small></div></div>
    </div>
    <div class="orders-journal-number-list">
-    ${items.map(r=>`<div class="orders-journal-number-row">${esc(r.order.zn)}</div>`).join('')}
+    ${items.map(r=>`<div class="orders-journal-number-row"><b>${esc(r.order.zn)}</b><span class="orders-journal-type ${r.order.type==='ТЭК'?'is-tek':'is-regular'}">${r.order.type==='ТЭК'?'ТЭК':'Обычная'}</span></div>`).join('')}
    </div>
   </section>`;
  }).join(''):'<p class="message">Номеров ЗН по выбранным условиям нет.</p>';
