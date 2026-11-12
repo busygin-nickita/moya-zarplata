@@ -517,3 +517,6 @@ body.earnings-hidden-global .stats-breakdown b {
 }
 .orders-journal-type.is-tek{background:rgba(255,145,45,.16);border:1px solid rgba(255,145,45,.32);color:#ffb15c}
 .orders-journal-type.is-regular{background:rgba(120,160,210,.13);border:1px solid rgba(120,160,210,.25);color:#b9d5f5}
+
+/* Hide the entire earnings calendar content in privacy mode */
+body.earnings-hidden-global .calendar-private-content{display:none!important}
