@@ -1169,6 +1169,11 @@ document.addEventListener('click',async e=>{
   $('workDaySection')?.scrollIntoView({behavior:'smooth',block:'start'});
  }
  if(el.id==='openMissedJournal'){
+  const dateFilter=$('missedJournalDate');
+  if(dateFilter)dateFilter.value=localDateString();
+  const monthFilter=$('missedJournalMonth');
+  if(monthFilter)monthFilter.value='';
+  window.__missedJournalDateInitialized=true;
   await renderMissedJournal();
   $('missedJournalSection').scrollIntoView({behavior:'smooth',block:'start'});
  }
