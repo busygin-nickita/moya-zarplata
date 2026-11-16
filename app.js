@@ -330,9 +330,15 @@ async function renderMissedJournal(){
  const query=($('missedJournalSearch')?.value||'').trim().toLowerCase();
  const category=$('missedJournalCategory')?.value||'';
  const month=$('missedJournalMonth')?.value||'';
+ const dateInput=$('missedJournalDate');
+ if(!window.__missedJournalDateInitialized){
+  if(dateInput&&!dateInput.value)dateInput.value=localDateString();
+  window.__missedJournalDateInitialized=true;
+ }
+ const date=dateInput?.value||'';
  const filtered=records.filter(r=>{
   const haystack=[r.item.number,r.item.category,r.item.reason,r.driver].join(' ').toLowerCase();
-  return (!query||haystack.includes(query))&&(!category||r.item.category===category)&&(!month||r.date.startsWith(month));
+  return (!query||haystack.includes(query))&&(!category||r.item.category===category)&&(!month||r.date.startsWith(month))&&(!date||r.date===date);
  });
  $('missedJournalCount').textContent=String(filtered.length);
  $('missedJournalTotal').textContent='Всего: '+records.length;
@@ -1092,10 +1098,14 @@ window.addEventListener('afterprint',()=>{$('printReport')?.setAttribute('aria-h
   renderOrdersJournal();
  });
 });
-['missedJournalSearch','missedJournalCategory','missedJournalMonth'].forEach(id=>{
+['missedJournalSearch','missedJournalCategory','missedJournalMonth','missedJournalDate'].forEach(id=>{
  const el=$(id);
  if(!el)return;
- el.addEventListener(id==='missedJournalSearch'?'input':'change',renderMissedJournal);
+ el.addEventListener(id==='missedJournalSearch'?'input':'change',()=>{
+  if(id==='missedJournalMonth'&&el.value&&$('missedJournalDate'))$('missedJournalDate').value='';
+  if(id==='missedJournalDate'&&el.value&&$('missedJournalMonth'))$('missedJournalMonth').value='';
+  renderMissedJournal();
+ });
 });
 
 document.addEventListener('input',e=>{
