@@ -547,3 +547,17 @@ body.earnings-hidden-global .calendar-private-content{display:none!important}
 .totals-comparison-divider{height:1px;margin:12px 2px;background:linear-gradient(90deg,rgba(145,153,165,.45),rgba(255,145,35,.55))}
 .totals-comparison .totals-raw .totals-group-grid>div{background:rgba(145,153,165,.075);border-color:#454b55}
 .totals-comparison .totals-paid .totals-group-grid>div{background:rgba(255,145,35,.09);border-color:rgba(255,145,35,.38)}
+
+/* Keep the comparison separator as a thin line; reset generic .totals div card styles */
+.totals .totals-comparison-divider{
+ display:block!important;
+ width:auto!important;
+ min-height:0!important;
+ height:1px!important;
+ margin:12px 5px!important;
+ padding:0!important;
+ border:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+ background:linear-gradient(90deg,rgba(145,153,165,.55),rgba(255,145,35,.65))!important;
+}
