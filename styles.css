@@ -539,3 +539,11 @@ body.earnings-hidden-global .calendar-private-content{display:none!important}
 .totals-payments>div{background:#101215;border:1px solid #292d32}
 .totals-payments span{font-size:10px;color:var(--muted)}
 .totals-payments b{font-size:14px;color:#fff}
+
+/* Unified comparison card for daily totals */
+.totals-comparison{border:1px solid #454b55;border-radius:17px;padding:12px;background:linear-gradient(155deg,rgba(145,153,165,.09),rgba(255,145,35,.045))}
+.totals-comparison .totals-group{border:0;border-radius:0;padding:3px;background:transparent}
+.totals-comparison .totals-group-grid>div{min-height:78px}
+.totals-comparison-divider{height:1px;margin:12px 2px;background:linear-gradient(90deg,rgba(145,153,165,.45),rgba(255,145,35,.55))}
+.totals-comparison .totals-raw .totals-group-grid>div{background:rgba(145,153,165,.075);border-color:#454b55}
+.totals-comparison .totals-paid .totals-group-grid>div{background:rgba(255,145,35,.09);border-color:rgba(255,145,35,.38)}
