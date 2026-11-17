@@ -577,7 +577,7 @@ function showCalendarDetail(day){
 
 async function renderOrderAnalytics(monthKey=$('month').value){
  const days=(await all()).filter(d=>d.month===monthKey);
- let count=0,weight=0,points=0,missed=0,overtime=0;
+ let count=0,rawWeight=0,rawPoints=0,weight=0,points=0,missed=0,overtime=0;
  let workDays=0,bestDay=null;
  for(const d of days){
   if(d.status==='Выходной')continue;
@@ -588,12 +588,16 @@ async function renderOrderAnalytics(monthKey=$('month').value){
    bestDay={date:d.date,count:orders.length};
   }
   const c=calc(d);
+  rawWeight+=c.rawWeight;
+  rawPoints+=c.rawPoints;
   weight+=c.weight;
   points+=c.points;
   missed+=(d.undelivered||[]).filter(m=>m.number||m.reason).length;
   overtime+=Number(d.overtime)||0;
  }
  $('analyticsOrders').textContent=String(count);
+ $('analyticsRawWeight').textContent=(rawWeight/1000).toLocaleString('ru-RU',{maximumFractionDigits:2})+' т';
+ $('analyticsRawPoints').textContent=rawPoints.toLocaleString('ru-RU',{maximumFractionDigits:1});
  $('analyticsWeight').textContent=(weight/1000).toLocaleString('ru-RU',{maximumFractionDigits:2})+' т';
  $('analyticsPoints').textContent=points.toLocaleString('ru-RU',{maximumFractionDigits:1});
  $('analyticsAverage').textContent=count?(weight/count).toLocaleString('ru-RU',{maximumFractionDigits:0})+' кг':'0 кг';
