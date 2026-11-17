@@ -567,3 +567,7 @@ body.earnings-hidden-global .calendar-private-content{display:none!important}
 .totals>div{background:#101215;border:1px solid #292d32;border-radius:12px;padding:11px;display:grid;gap:5px}
 .totals span{font-size:10px;color:var(--muted)}
 .totals b{font-size:14px;color:#fff}
+
+/* Gross totals before applying the TEK coefficient */
+.totals .total-before-coeff{background:rgba(145,153,165,.075);border-color:#454b55}
+.totals .total-before-coeff span,.totals .total-before-coeff b{color:#aeb3bb}
