@@ -368,17 +368,21 @@ function esc(v){
 function calc(d){
  if(d.status==='Выходной'){
   return {
-   weight:0,points:0,weightPay:0,
+   rawWeight:0,rawPoints:0,weight:0,points:0,weightPay:0,
    pointsPay:0,overtimePay:0,total:0
   };
  }
 
- let weight=0,points=0;
+ let rawWeight=0,rawPoints=0,weight=0,points=0;
 
  (d.orders||[]).forEach(o=>{
+  const orderWeight=(Number(o.weight)||0)*1000;
+  const orderPoints=Number(o.points)||0;
   const k=o.type==='ТЭК'?rates.tek:1;
-  weight+=(Number(o.weight)||0)*1000*k;
-  points+=(Number(o.points)||0)*k;
+  rawWeight+=orderWeight;
+  rawPoints+=orderPoints;
+  weight+=orderWeight*k;
+  points+=orderPoints*k;
  });
 
  const weightPay=weight*rates.kg;
@@ -386,6 +390,8 @@ function calc(d){
  const overtimePay=(Number(d.overtime)||0)*rates.overtime;
 
  return {
+  rawWeight,
+  rawPoints,
   weight,
   points,
   weightPay,
@@ -423,6 +429,8 @@ function renderCalc(){
   if(value)value.textContent=rub(total);
  });
 
+ $('rawWeightTotal').textContent=(Math.round(c.rawWeight*100)/100).toLocaleString('ru-RU')+' кг';
+ $('rawPointsTotal').textContent=(Math.round(c.rawPoints*100)/100).toLocaleString('ru-RU');
  $('weightTotal').textContent=(Math.round(c.weight*100)/100).toLocaleString('ru-RU')+' кг';
  $('pointsTotal').textContent=(Math.round(c.points*100)/100).toLocaleString('ru-RU');
  $('weightPay').textContent=rub(c.weightPay);
