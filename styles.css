@@ -561,3 +561,9 @@ body.earnings-hidden-global .calendar-private-content{display:none!important}
  box-shadow:none!important;
  background:linear-gradient(90deg,rgba(145,153,165,.55),rgba(255,145,35,.65))!important;
 }
+
+/* Restore the compact four-tile daily totals layout */
+.totals{grid-template-columns:1fr 1fr;gap:9px}
+.totals>div{background:#101215;border:1px solid #292d32;border-radius:12px;padding:11px;display:grid;gap:5px}
+.totals span{font-size:10px;color:var(--muted)}
+.totals b{font-size:14px;color:#fff}
