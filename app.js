@@ -428,6 +428,8 @@ function renderCalc(){
   const value=card.querySelector('.order-card-total b');
   if(value)value.textContent=rub(total);
  });
+ $('rawWeightTotal').textContent=(Math.round(c.rawWeight*100)/100).toLocaleString('ru-RU')+' кг';
+ $('rawPointsTotal').textContent=(Math.round(c.rawPoints*100)/100).toLocaleString('ru-RU');
  $('weightTotal').textContent=(Math.round(c.weight*100)/100).toLocaleString('ru-RU')+' кг';
  $('pointsTotal').textContent=(Math.round(c.points*100)/100).toLocaleString('ru-RU');
  $('weightPay').textContent=rub(c.weightPay);
