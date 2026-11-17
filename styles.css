@@ -520,3 +520,22 @@ body.earnings-hidden-global .stats-breakdown b {
 
 /* Hide the entire earnings calendar content in privacy mode */
 body.earnings-hidden-global .calendar-private-content{display:none!important}
+
+/* Daily totals: neutral raw values and orange payable values */
+.totals{display:grid;grid-template-columns:1fr;gap:12px}
+.totals-group{border:1px solid #343941;border-radius:16px;padding:12px;background:rgba(255,255,255,.025)}
+.totals-group-title{font-size:12px;font-weight:800;line-height:1.35;margin:0 0 10px;color:#aeb3bb}
+.totals-group-grid,.totals-payments{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.totals-group-grid>div,.totals-payments>div{min-width:0;display:grid;gap:6px;padding:11px;border-radius:12px}
+.totals-group-grid>div{background:#191c21;border:1px solid #3b414a}
+.totals-raw .totals-group-title,.totals-raw .totals-group-grid span,.totals-raw .totals-group-grid b{color:#aeb3bb}
+.totals-raw .totals-group-grid>div{background:rgba(145,153,165,.075);border-color:#454b55}
+.totals-raw .totals-group-grid b{font-size:19px}
+.totals-paid{border-color:rgba(255,145,35,.38);background:rgba(255,145,35,.045)}
+.totals-paid .totals-group-title{color:#ffad59}
+.totals-paid .totals-group-grid>div{background:rgba(255,145,35,.09);border-color:rgba(255,145,35,.38)}
+.totals-paid .totals-group-grid span{color:#d4b18c}
+.totals-paid .totals-group-grid b{color:#fff;font-size:19px}
+.totals-payments>div{background:#101215;border:1px solid #292d32}
+.totals-payments span{font-size:10px;color:var(--muted)}
+.totals-payments b{font-size:14px;color:#fff}
