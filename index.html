@@ -135,7 +135,26 @@
  <p class="scanner-hint">Если код не считывается, можно ввести номер ЗН вручную в поле заказа.</p>
 </div>
 <div id="orders"></div>
-<div class="totals"><div><span class="metric-label"><svg class="inline-icon"><use href="#i-weight"/></svg>Общий вес без коэффициента</span><b id="rawWeightTotal">0 кг</b></div><div><span>Всего адресов без коэффициента</span><b id="rawPointsTotal">0</b></div><div><span class="metric-label"><svg class="inline-icon"><use href="#i-weight"/></svg>Оплачиваемый вес</span><b id="weightTotal">0 кг</b></div><div><span>Оплачиваемые адреса</span><b id="pointsTotal">0</b></div><div><span class="metric-label"><svg class="inline-icon"><use href="#i-coins"/></svg>Оплата за вес</span><b id="weightPay">0 ₽</b></div><div><span class="metric-label"><svg class="inline-icon"><use href="#i-coins"/></svg>Оплата за адреса</span><b id="pointsPay">0 ₽</b></div></div>
+<div class="totals">
+ <div class="totals-group totals-raw">
+  <div class="totals-group-title">Без коэффициента ТЭК · общие</div>
+  <div class="totals-group-grid">
+   <div><span class="metric-label">Общий вес</span><b id="rawWeightTotal">0 кг</b></div>
+   <div><span>Всего адресов</span><b id="rawPointsTotal">0</b></div>
+  </div>
+ </div>
+ <div class="totals-group totals-paid">
+  <div class="totals-group-title">С учётом коэффициента · оплачиваемые</div>
+  <div class="totals-group-grid">
+   <div><span class="metric-label">Оплачиваемый вес</span><b id="weightTotal">0 кг</b></div>
+   <div><span>Оплачиваемые адреса</span><b id="pointsTotal">0</b></div>
+  </div>
+ </div>
+ <div class="totals-payments">
+  <div><span class="metric-label"><svg class="inline-icon"><use href="#i-coins"/></svg>Оплата за вес</span><b id="weightPay">0 ₽</b></div>
+  <div><span class="metric-label"><svg class="inline-icon"><use href="#i-coins"/></svg>Оплата за адреса</span><b id="pointsPay">0 ₽</b></div>
+ </div>
+</div>
 </section>
 <section class="card">
 <div class="section-head"><h2><svg class="heading-icon danger"><use href="#i-alert"/></svg>Невывозы за день</h2><button id="addMissed" class="small-btn">+ Добавить</button></div>
@@ -214,5 +233,5 @@
 </nav>
 <section id="printReport" aria-hidden="true"></section>
 <footer>Локальное хранение · Google Sheets при подключении интернета</footer>
-<script src="config.js?v=15"></script><script src="https://unpkg.com/@zxing/browser@0.2.1"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script><script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="app.js?v=51"></script>
+<script src="config.js?v=15"></script><script src="https://unpkg.com/@zxing/browser@0.2.1"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script><script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="app.js?v=52"></script>
 </body></html>
