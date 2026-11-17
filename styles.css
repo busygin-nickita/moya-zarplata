@@ -578,3 +578,8 @@ body.earnings-hidden-global .calendar-private-content{display:none!important}
 .metric-label .muted-icon{stroke:#9da3ad}
 .totals .total-before-coeff .metric-label .inline-icon{stroke:#9da3ad}
 .totals>div:not(.total-before-coeff) .metric-label .inline-icon{stroke:var(--accent)}
+
+/* Consistent mini-icons in order analytics */
+.analytics-tile .metric-label{display:inline-flex;align-items:center;gap:7px}
+.analytics-tile .metric-label .inline-icon{width:18px;height:18px;flex:0 0 18px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.analytics-tile:has(#analyticsMissed) .metric-label .inline-icon{stroke:#f87171}
