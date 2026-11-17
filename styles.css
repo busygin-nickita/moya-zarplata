@@ -571,3 +571,10 @@ body.earnings-hidden-global .calendar-private-content{display:none!important}
 /* Gross totals before applying the TEK coefficient */
 .totals .total-before-coeff{background:rgba(145,153,165,.075);border-color:#454b55}
 .totals .total-before-coeff span,.totals .total-before-coeff b{color:#aeb3bb}
+
+/* Small consistent metric icons */
+.metric-label{display:inline-flex;align-items:center;gap:7px}
+.metric-label .inline-icon{width:18px;height:18px;flex:0 0 18px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.metric-label .muted-icon{stroke:#9da3ad}
+.totals .total-before-coeff .metric-label .inline-icon{stroke:#9da3ad}
+.totals>div:not(.total-before-coeff) .metric-label .inline-icon{stroke:var(--accent)}
