@@ -123,7 +123,7 @@
 <label>Статус<select id="status"><option>Рабочий</option><option>Выходной</option></select></label>
 <label>Водитель<input id="driver" placeholder="ФИО"></label>
 <label>Поддоны<input id="pallets" type="number" min="0" step="1" value="0"></label>
-<label>Переработка, ч<input id="overtime" type="number" min="0" step="0.5" value="0"></label>
+<label><span class="metric-label"><svg class="inline-icon"><use href="#i-timer"/></svg>Переработка, ч</span><input id="overtime" type="number" min="0" step="0.5" value="0"></label>
 </div>
 </section>
 <section class="card">
@@ -136,12 +136,12 @@
 </div>
 <div id="orders"></div>
 <div class="totals">
- <div class="total-before-coeff"><span class="metric-label">Общий вес без деления</span><b id="rawWeightTotal">0 кг</b></div>
- <div class="total-before-coeff"><span>Адреса без деления</span><b id="rawPointsTotal">0</b></div>
+ <div class="total-before-coeff"><span class="metric-label"><svg class="inline-icon muted-icon"><use href="#i-weight"/></svg>Общий вес без деления</span><b id="rawWeightTotal">0 кг</b></div>
+ <div class="total-before-coeff"><span class="metric-label"><svg class="inline-icon muted-icon"><use href="#i-pin"/></svg>Адреса без деления</span><b id="rawPointsTotal">0</b></div>
  <div><span class="metric-label"><svg class="inline-icon"><use href="#i-weight"/></svg>Оплачиваемый вес</span><b id="weightTotal">0 кг</b></div>
- <div><span>Оплачиваемые точки</span><b id="pointsTotal">0</b></div>
+ <div><span class="metric-label"><svg class="inline-icon"><use href="#i-points"/></svg>Оплачиваемые точки</span><b id="pointsTotal">0</b></div>
  <div><span class="metric-label"><svg class="inline-icon"><use href="#i-coins"/></svg>Оплата за вес</span><b id="weightPay">0 ₽</b></div>
- <div><span class="metric-label"><svg class="inline-icon"><use href="#i-coins"/></svg>Оплата за точки</span><b id="pointsPay">0 ₽</b></div>
+ <div><span class="metric-label"><svg class="inline-icon"><use href="#i-wallet"/></svg>Оплата за точки</span><b id="pointsPay">0 ₽</b></div>
 </div>
 </section>
 <section class="card">
@@ -221,5 +221,5 @@
 </nav>
 <section id="printReport" aria-hidden="true"></section>
 <footer>Локальное хранение · Google Sheets при подключении интернета</footer>
-<script src="config.js?v=15"></script><script src="https://unpkg.com/@zxing/browser@0.2.1"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script><script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="app.js?v=55"></script>
+<script src="config.js?v=15"></script><script src="https://unpkg.com/@zxing/browser@0.2.1"></script><script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script><script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script><script src="app.js?v=56"></script>
 </body></html>
